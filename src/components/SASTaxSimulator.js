@@ -115,9 +115,10 @@ const SASTaxSimulator = () => {
     const costiSociOperativi = soci.reduce((total, socio) => {
         if (socio.tipo !== "operativo") return total;
 
-        // Calcola costo buoni pasto (deducibili al 75%)
+        // Calcola costo buoni pasto 
+
         const costoBuoniPasto = socio.buoniPasto ?
-            socio.giornateLavorate * socio.valoreBuoniPasto * 0.75 : 0;
+            socio.giornateLavorate * socio.valoreBuoniPasto  : 0;
 
         // Calcola costo trasferte
         const costoTrasferte = socio.trasferte ?
@@ -455,7 +456,7 @@ const SASTaxSimulator = () => {
                                             onChange={(e) => updateSocio(socio.id, 'buoniPasto', e.target.checked)}
                                             className="mr-2"
                                         />
-                                        Buoni Pasto (deducibili al 75%)
+                                        Buoni Pasto 
                                     </label>
                                     {socio.buoniPasto && (
                                         <div className="grid grid-cols-2 gap-2">
