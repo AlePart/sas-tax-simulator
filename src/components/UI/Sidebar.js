@@ -101,7 +101,7 @@ const Sidebar = ({ fatturato, costi, costiSociOperativi, utileAziendale, irap, u
             </div>
 
             <div className="mt-4 text-center text-xs text-gray-500">
-                © 2025 Key-Code
+                2025 Key-Code
             </div>
         </div>
     );

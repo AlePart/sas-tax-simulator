@@ -193,7 +193,7 @@ const SASTaxSimulator = () => {
             <div className="text-sm text-gray-500 mt-8">
                 <p>Disclaimer: Questo simulatore fornisce una stima indicativa. Per calcoli precisi si consiglia di consultare un commercialista.</p>
                 <p>Le aliquote IRPEF e i contributi INPS utilizzati sono configurabili ma potrebbero richiedere aggiornamenti in base alle normative vigenti.</p>
-                <p className="mt-4 text-center font-semibold">© 2025 Key-Code. Tutti i diritti riservati.</p>
+                <p className="mt-4 text-center font-semibold">2025 Key-Code. Tutti i diritti riservati.</p>
             </div>
 
             {/* Sidebar laterale su schermi grandi */}
