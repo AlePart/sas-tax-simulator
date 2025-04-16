@@ -83,10 +83,10 @@ const Sidebar = ({ fatturato, costi, costiSociOperativi, utileAziendale, irap, u
                             <span>Netto totale:</span>
                             <span>{formatCurrency(totaleNettoPercepito)}</span>
                         </li>
-                        <li className="flex justify-between mt-2 pt-2 border-t text-xs">
-                            <span>Pressione fiscale:</span>
-                            <span>{(((totaleImposte + irap) / (fatturato - costi)) * 100).toFixed(1)}%</span>
-                        </li>
+                        {/*<li className="flex justify-between mt-2 pt-2 border-t text-xs">*/}
+                        {/*    <span>Pressione fiscale:</span>*/}
+                        {/*    <span>{(((totaleImposte + irap) / (fatturato - costi)) * 100).toFixed(1)}%</span>*/}
+                        {/*</li>*/}
                     </ul>
                 </div>
             </div>
