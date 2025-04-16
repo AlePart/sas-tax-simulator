@@ -91,14 +91,14 @@ const Sidebar = ({ fatturato, costi, costiSociOperativi, utileAziendale, irap, u
                 </div>
             </div>
 
-            <div className="mt-6 text-center border-t pt-4">
-                <button
-                    onClick={() => window.print()}
-                    className="bg-blue-500 text-white text-sm py-2 px-3 rounded hover:bg-blue-600 transition-colors"
-                >
-                    Stampa simulazione
-                </button>
-            </div>
+            {/*<div className="mt-6 text-center border-t pt-4">*/}
+            {/*    <button*/}
+            {/*        onClick={() => window.print()}*/}
+            {/*        className="bg-blue-500 text-white text-sm py-2 px-3 rounded hover:bg-blue-600 transition-colors"*/}
+            {/*    >*/}
+            {/*        Stampa simulazione*/}
+            {/*    </button>*/}
+            {/*</div>*/}
 
             <div className="mt-4 text-center text-xs text-gray-500">
                 2025 Key-Code
