@@ -570,3 +570,4 @@ function SASTaxSimulator() {
         </div>
     );
 }
+export default SASTaxSimulator;
