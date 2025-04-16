@@ -85,7 +85,7 @@ const Sidebar = ({ fatturato, costi, costiSociOperativi, utileAziendale, irap, u
                         </li>
                         <li className="flex justify-between mt-2 pt-2 border-t text-xs">
                             <span>Pressione fiscale:</span>
-                            <span>{((totaleImposte / fatturato) * 100).toFixed(1)}%</span>
+                            <span>{(((totaleImposte + irap) / (fatturato - costi)) * 100).toFixed(1)}%</span>
                         </li>
                     </ul>
                 </div>
