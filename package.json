@@ -2,7 +2,7 @@
   "name": "sas-tax-simulator",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://alepart.github.io/sasSim/",
+  "homepage": "https://alepart.github.io/sas-tax-simulator",
   "dependencies": {
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
