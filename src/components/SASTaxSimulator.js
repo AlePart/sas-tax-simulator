@@ -110,8 +110,23 @@ const SASTaxSimulator = () => {
         }).format(value);
     };
 
-    // Calcola l'utile aziendale
-    const utileAziendale = fatturato - costi;
+    // Calcola costi dei buoni pasto e trasferte per i soci operativi
+    const costiSociOperativi = soci.reduce((total, socio) => {
+        if (socio.tipo !== "operativo") return total;
+
+        // Calcola costo buoni pasto (deducibili al 75%)
+        const costoBuoniPasto = socio.buoniPasto ?
+            socio.giornateLavorate * socio.valoreBuoniPasto * 0.75 : 0;
+
+        // Calcola costo trasferte
+        const costoTrasferte = socio.trasferte ?
+            socio.giorniTrasferta * socio.importoTrasfertaGiorno : 0;
+
+        return total + costoBuoniPasto + costoTrasferte;
+    }, 0);
+
+    // Calcola l'utile aziendale tenendo conto dei costi per soci operativi
+    const utileAziendale = fatturato - costi - costiSociOperativi;
 
     // Calcola IRAP (3.9% di default)
     const irap = utileAziendale * (aliquotaIrap / 100);
@@ -125,24 +140,19 @@ const SASTaxSimulator = () => {
         const quotaUtile = (utileDopoIrap * socio.percentuale) / 100;
 
         // Calcola importo buoni pasto
-        const importoBuoniPasto = socio.buoniPasto ? socio.giornateLavorate * socio.valoreBuoniPasto : 0;
-        // Solo il 75% dei buoni pasto è deducibile
-        const buoniPastoDeducibili = socio.buoniPasto ? importoBuoniPasto * 0.75 : 0;
-
-        const buoniPastoImponibili = socio.buoniPasto && socio.valoreBuoniPasto > socio.buoniPastoEsentiFino ?
-            (socio.giornateLavorate * (socio.valoreBuoniPasto - socio.buoniPastoEsentiFino)) * 0.75 : 0;
+        const importoBuoniPasto = socio.tipo === "operativo" && socio.buoniPasto ?
+            socio.giornateLavorate * socio.valoreBuoniPasto : 0;
 
         // Calcola rimborsi trasferta
-        const importoTrasferte = socio.trasferte ? socio.giorniTrasferta * socio.importoTrasfertaGiorno : 0;
-        const trasferteImponibili = socio.trasferte && socio.importoTrasfertaGiorno > socio.trasfertaEsenteFino ?
-            socio.giorniTrasferta * (socio.importoTrasfertaGiorno - socio.trasfertaEsenteFino) : 0;
+        const importoTrasferte = socio.tipo === "operativo" && socio.trasferte ?
+            socio.giorniTrasferta * socio.importoTrasfertaGiorno : 0;
 
         // Calcola imponibile contributivo INPS
-        const imponibileInps = socio.tipo === "operativo" ? quotaUtile + buoniPastoImponibili + trasferteImponibili : 0;
+        const imponibileInps = socio.tipo === "operativo" ? quotaUtile : 0;
         const contributiInps = imponibileInps * (aliquotaInps / 100);
 
         // Calcola imponibile IRPEF
-        const redditoComplessivo = quotaUtile + socio.redditoEsterno + buoniPastoImponibili + trasferteImponibili;
+        const redditoComplessivo = quotaUtile + socio.redditoEsterno;
 
         // Deduzioni per contributi INPS (totalmente deducibili)
         const redditoImponibileDopoInps = redditoComplessivo - contributiInps;
@@ -164,7 +174,6 @@ const SASTaxSimulator = () => {
             socio,
             quotaUtile,
             importoBuoniPasto,
-            buoniPastoDeducibili,
             importoTrasferte,
             contributiInps,
             irpef: irpefNettoInps,
@@ -204,7 +213,7 @@ const SASTaxSimulator = () => {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Costi Aziendali (&euro;)
+                            Costi Aziendali Base (&euro;)
                         </label>
                         <input
                             type="number"
@@ -248,6 +257,10 @@ const SASTaxSimulator = () => {
 
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="p-3 bg-blue-50 rounded">
+                        <span className="text-sm text-gray-600">Costi Buoni Pasto/Trasferte:</span>
+                        <p className="text-lg font-semibold">{formatCurrency(costiSociOperativi)}</p>
+                    </div>
+                    <div className="p-3 bg-blue-50 rounded">
                         <span className="text-sm text-gray-600">Utile Aziendale:</span>
                         <p className="text-lg font-semibold">{formatCurrency(utileAziendale)}</p>
                     </div>
@@ -255,7 +268,10 @@ const SASTaxSimulator = () => {
                         <span className="text-sm text-gray-600">IRAP ({aliquotaIrap}%):</span>
                         <p className="text-lg font-semibold">{formatCurrency(irap)}</p>
                     </div>
-                    <div className="p-3 bg-blue-50 rounded">
+                </div>
+
+                <div className="mt-2 grid grid-cols-1 md:grid-cols-1 gap-4">
+                    <div className="p-3 bg-green-50 rounded">
                         <span className="text-sm text-gray-600">Utile dopo IRAP:</span>
                         <p className="text-lg font-semibold">{formatCurrency(utileDopoIrap)}</p>
                     </div>
@@ -411,107 +427,111 @@ const SASTaxSimulator = () => {
                                     className="w-full p-2 border border-gray-300 rounded"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Giornate Lavorate
-                                </label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    max="365"
-                                    value={socio.giornateLavorate}
-                                    onChange={(e) => updateSocio(socio.id, 'giornateLavorate', Number(e.target.value))}
-                                    className="w-full p-2 border border-gray-300 rounded"
-                                />
-                            </div>
+                            {socio.tipo === "operativo" && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Giornate Lavorate
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        max="365"
+                                        value={socio.giornateLavorate}
+                                        onChange={(e) => updateSocio(socio.id, 'giornateLavorate', Number(e.target.value))}
+                                        className="w-full p-2 border border-gray-300 rounded"
+                                    />
+                                </div>
+                            )}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                                <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={socio.buoniPasto}
-                                        onChange={(e) => updateSocio(socio.id, 'buoniPasto', e.target.checked)}
-                                        className="mr-2"
-                                    />
-                                    Buoni Pasto (deducibili al 75%)
-                                </label>
-                                {socio.buoniPasto && (
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label className="block text-xs text-gray-600">Valore (&euro;/giorno)</label>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                value={socio.valoreBuoniPasto}
-                                                onChange={(e) => updateSocio(socio.id, 'valoreBuoniPasto', Number(e.target.value))}
-                                                className="w-full p-2 border border-gray-300 rounded"
-                                            />
+                        {socio.tipo === "operativo" && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={socio.buoniPasto}
+                                            onChange={(e) => updateSocio(socio.id, 'buoniPasto', e.target.checked)}
+                                            className="mr-2"
+                                        />
+                                        Buoni Pasto (deducibili al 75%)
+                                    </label>
+                                    {socio.buoniPasto && (
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div>
+                                                <label className="block text-xs text-gray-600">Valore (&euro;/giorno)</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={socio.valoreBuoniPasto}
+                                                    onChange={(e) => updateSocio(socio.id, 'valoreBuoniPasto', Number(e.target.value))}
+                                                    className="w-full p-2 border border-gray-300 rounded"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs text-gray-600">Esente fino a (&euro;)</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={socio.buoniPastoEsentiFino}
+                                                    onChange={(e) => updateSocio(socio.id, 'buoniPastoEsentiFino', Number(e.target.value))}
+                                                    className="w-full p-2 border border-gray-300 rounded"
+                                                />
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label className="block text-xs text-gray-600">Esente fino a (&euro;)</label>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                value={socio.buoniPastoEsentiFino}
-                                                onChange={(e) => updateSocio(socio.id, 'buoniPastoEsentiFino', Number(e.target.value))}
-                                                className="w-full p-2 border border-gray-300 rounded"
-                                            />
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={socio.trasferte}
+                                            onChange={(e) => updateSocio(socio.id, 'trasferte', e.target.checked)}
+                                            className="mr-2"
+                                        />
+                                        Rimborsi Trasferta
+                                    </label>
+                                    {socio.trasferte && (
+                                        <div className="grid grid-cols-3 gap-2">
+                                            <div>
+                                                <label className="block text-xs text-gray-600">Giorni</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    value={socio.giorniTrasferta}
+                                                    onChange={(e) => updateSocio(socio.id, 'giorniTrasferta', Number(e.target.value))}
+                                                    className="w-full p-2 border border-gray-300 rounded"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs text-gray-600">&euro;/giorno</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={socio.importoTrasfertaGiorno}
+                                                    onChange={(e) => updateSocio(socio.id, 'importoTrasfertaGiorno', Number(e.target.value))}
+                                                    className="w-full p-2 border border-gray-300 rounded"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-xs text-gray-600">Esente fino a (&euro;)</label>
+                                                <input
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    value={socio.trasfertaEsenteFino}
+                                                    onChange={(e) => updateSocio(socio.id, 'trasfertaEsenteFino', Number(e.target.value))}
+                                                    className="w-full p-2 border border-gray-300 rounded"
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
-                            <div>
-                                <label className="flex items-center text-sm font-medium text-gray-700 mb-2">
-                                    <input
-                                        type="checkbox"
-                                        checked={socio.trasferte}
-                                        onChange={(e) => updateSocio(socio.id, 'trasferte', e.target.checked)}
-                                        className="mr-2"
-                                    />
-                                    Rimborsi Trasferta
-                                </label>
-                                {socio.trasferte && (
-                                    <div className="grid grid-cols-3 gap-2">
-                                        <div>
-                                            <label className="block text-xs text-gray-600">Giorni</label>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                value={socio.giorniTrasferta}
-                                                onChange={(e) => updateSocio(socio.id, 'giorniTrasferta', Number(e.target.value))}
-                                                className="w-full p-2 border border-gray-300 rounded"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs text-gray-600">&euro;/giorno</label>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                value={socio.importoTrasfertaGiorno}
-                                                onChange={(e) => updateSocio(socio.id, 'importoTrasfertaGiorno', Number(e.target.value))}
-                                                className="w-full p-2 border border-gray-300 rounded"
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-xs text-gray-600">Esente fino a (&euro;)</label>
-                                            <input
-                                                type="number"
-                                                min="0"
-                                                step="0.01"
-                                                value={socio.trasfertaEsenteFino}
-                                                onChange={(e) => updateSocio(socio.id, 'trasfertaEsenteFino', Number(e.target.value))}
-                                                className="w-full p-2 border border-gray-300 rounded"
-                                            />
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -531,17 +551,18 @@ const SASTaxSimulator = () => {
                                     <p className="text-lg font-semibold">{formatCurrency(risultato.quotaUtile)}</p>
                                 </div>
 
-                                <div className="p-3 bg-blue-50 rounded">
-                                    <span className="text-sm text-gray-600">Buoni Pasto:</span>
-                                    <p className="text-lg font-semibold">{formatCurrency(risultato.importoBuoniPasto)}</p>
-                                    {risultato.buoniPastoDeducibili > 0 && (
-                                        <p className="text-xs text-gray-500">Deducibili: {formatCurrency(risultato.buoniPastoDeducibili)} (75%)</p>
-                                    )}
-                                </div>
-                                <div className="p-3 bg-blue-50 rounded">
-                                    <span className="text-sm text-gray-600">Rimborsi Trasferta:</span>
-                                    <p className="text-lg font-semibold">{formatCurrency(risultato.importoTrasferte)}</p>
-                                </div>
+                                {socio.tipo === "operativo" && (
+                                    <>
+                                        <div className="p-3 bg-blue-50 rounded">
+                                            <span className="text-sm text-gray-600">Buoni Pasto:</span>
+                                            <p className="text-lg font-semibold">{formatCurrency(risultato.importoBuoniPasto)}</p>
+                                        </div>
+                                        <div className="p-3 bg-blue-50 rounded">
+                                            <span className="text-sm text-gray-600">Rimborsi Trasferta:</span>
+                                            <p className="text-lg font-semibold">{formatCurrency(risultato.importoTrasferte)}</p>
+                                        </div>
+                                    </>
+                                )}
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
