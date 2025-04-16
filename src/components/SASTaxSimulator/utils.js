@@ -1,9 +1,12 @@
-// Funzioni di utilità per il simulatore SAS
+/**
+ * Utility per il simulatore di tassazione SAS
+ * Copyright © 2025 Key-Code. Tutti i diritti riservati.
+ */
 
 /**
  * Formatta un valore numerico come valuta EUR
- * @param {number} value - Il valore da formattare
- * @returns {string} Il valore formattato come valuta
+ * @param {number} value - Valore da formattare
+ * @returns {string} Valore formattato
  */
 export const formatCurrency = (value) => {
     return new Intl.NumberFormat('it-IT', {
@@ -13,17 +16,17 @@ export const formatCurrency = (value) => {
 };
 
 /**
- * Calcola l'IRPEF in base agli scaglioni configurati
- * @param {number} reddito - Il reddito imponibile
- * @param {Array} scaglioniIrpef - Gli scaglioni IRPEF configurati
- * @returns {number} L'importo IRPEF calcolato
+ * Calcola l'IRPEF in base agli scaglioni
+ * @param {number} reddito - Reddito imponibile
+ * @param {Array} scaglioni - Scaglioni IRPEF
+ * @returns {number} Importo IRPEF
  */
-export const calcolaIrpef = (reddito, scaglioniIrpef) => {
+export const calcolaIrpef = (reddito, scaglioni) => {
     let irpef = 0;
     let redditoRimanente = reddito;
     let scaglionePrecedente = 0;
 
-    for (const scaglione of scaglioniIrpef) {
+    for (const scaglione of scaglioni) {
         const scaglioneAttuale = Math.min(redditoRimanente, scaglione.limite - scaglionePrecedente);
 
         if (scaglioneAttuale > 0) {
@@ -39,36 +42,15 @@ export const calcolaIrpef = (reddito, scaglioniIrpef) => {
 };
 
 /**
- * Calcola i costi dei buoni pasto e trasferte per i soci operativi
- * @param {Array} soci - Lista dei soci
- * @returns {number} Totale dei costi
- */
-export const calcolaCostiSociOperativi = (soci) => {
-    return soci.reduce((total, socio) => {
-        if (socio.tipo !== "operativo") return total;
-
-        // Calcola costo buoni pasto (deducibili al 75%)
-        const costoBuoniPasto = socio.buoniPasto ?
-            socio.giornateLavorate * socio.valoreBuoniPasto * 0.75 : 0;
-
-        // Calcola costo trasferte
-        const costoTrasferte = socio.trasferte ?
-            socio.giorniTrasferta * socio.importoTrasfertaGiorno : 0;
-
-        return total + costoBuoniPasto + costoTrasferte;
-    }, 0);
-};
-
-/**
- * Crea un nuovo oggetto socio con valori predefiniti
- * @param {number} id - ID univoco per il socio
+ * Crea un nuovo socio con valori predefiniti
+ * @param {number} id - ID del socio
  * @param {string} nome - Nome del socio
  * @returns {Object} Oggetto socio
  */
-export const creaNuovoSocio = (id, nome = null) => {
+export const creaNuovoSocio = (id, nome = `Socio ${id}`) => {
     return {
         id,
-        nome: nome || `Socio ${id}`,
+        nome,
         tipo: "capitale",
         percentuale: 0,
         redditoEsterno: 0,
@@ -84,16 +66,44 @@ export const creaNuovoSocio = (id, nome = null) => {
 };
 
 /**
- * Calcola risultati fiscali per un socio
+ * Calcola i costi dei soci operativi
+ * @param {Array} soci - Lista dei soci
+ * @returns {number} Totale costi
+ */
+export const calcolaCostiSociOperativi = (soci) => {
+    return soci.reduce((total, socio) => {
+        if (socio.tipo !== "operativo") return total;
+
+        // Calcola costo buoni pasto (deducibili al 100%)
+        const costoBuoniPasto = socio.buoniPasto ?
+            socio.giornateLavorate * socio.valoreBuoniPasto : 0;
+
+        // Calcola costo trasferte
+        const costoTrasferte = socio.trasferte ?
+            socio.giorniTrasferta * socio.importoTrasfertaGiorno : 0;
+
+        return total + costoBuoniPasto + costoTrasferte;
+    }, 0);
+};
+
+/**
+ * Calcola i risultati per un socio
  * @param {Object} socio - Dati del socio
- * @param {number} utileDopoIrap - Utile dopo IRAP da distribuire
+ * @param {number} utileDopoIrap - Utile dopo IRAP
  * @param {number} aliquotaInps - Aliquota INPS
  * @param {Array} scaglioniIrpef - Scaglioni IRPEF
- * @param {number} aliqRegionale - Aliquota addizionale regionale
- * @param {number} aliqComunale - Aliquota addizionale comunale
+ * @param {number} aliqRegionale - Aliquota regionale
+ * @param {number} aliqComunale - Aliquota comunale
  * @returns {Object} Risultati calcolati
  */
-export const calcolaRisultatiSocio = (socio, utileDopoIrap, aliquotaInps, scaglioniIrpef, aliqRegionale, aliqComunale) => {
+export const calcolaRisultatiSocio = (
+    socio,
+    utileDopoIrap,
+    aliquotaInps,
+    scaglioniIrpef,
+    aliqRegionale,
+    aliqComunale
+) => {
     // Calcola quota utile in base alla percentuale di partecipazione
     const quotaUtile = (utileDopoIrap * socio.percentuale) / 100;
 
@@ -116,14 +126,14 @@ export const calcolaRisultatiSocio = (socio, utileDopoIrap, aliquotaInps, scagli
     const redditoImponibileDopoInps = redditoComplessivo - contributiInps;
 
     // Calcola IRPEF usando la funzione con gli scaglioni configurabili
-    const irpefNettoInps = calcolaIrpef(redditoImponibileDopoInps, scaglioniIrpef);
+    const irpef = calcolaIrpef(redditoImponibileDopoInps, scaglioniIrpef);
 
     // Calcolo addizionali regionali e comunali
     const addizionaleRegionale = redditoImponibileDopoInps * (aliqRegionale / 100);
     const addizionaleComunale = redditoImponibileDopoInps * (aliqComunale / 100);
 
     // Totale imposte
-    const totaleImposte = irpefNettoInps + addizionaleRegionale + addizionaleComunale;
+    const totaleImposte = irpef + addizionaleRegionale + addizionaleComunale;
 
     // Netto percepito
     const nettoPercepito = quotaUtile - contributiInps - totaleImposte + importoBuoniPasto + importoTrasferte;
@@ -134,7 +144,7 @@ export const calcolaRisultatiSocio = (socio, utileDopoIrap, aliquotaInps, scagli
         importoBuoniPasto,
         importoTrasferte,
         contributiInps,
-        irpef: irpefNettoInps,
+        irpef,
         addizionaleRegionale,
         addizionaleComunale,
         totaleImposte,

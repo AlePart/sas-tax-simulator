@@ -3,21 +3,20 @@ import SocioForm from './SocioForm';
 import { creaNuovoSocio } from './utils';
 
 /**
- * Componente per la lista dei soci
+ * Componente per la gestione dei soci
  */
 const SocioList = ({ soci, setSoci, totalPercentuale }) => {
-    // Aggiunge un nuovo socio
     const aggiungiSocio = () => {
-        const nuovoSocio = creaNuovoSocio(soci.length + 1);
+        const nuovoSocio = creaNuovoSocio(
+            soci.length > 0 ? Math.max(...soci.map(s => s.id)) + 1 : 1
+        );
         setSoci([...soci, nuovoSocio]);
     };
 
-    // Rimuove un socio dalla lista
     const rimuoviSocio = (id) => {
         setSoci(soci.filter(socio => socio.id !== id));
     };
 
-    // Aggiorna i dati di un socio
     const updateSocio = (id, campo, valore) => {
         setSoci(soci.map(socio => {
             if (socio.id === id) {
