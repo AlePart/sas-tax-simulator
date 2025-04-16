@@ -22,11 +22,17 @@ jobs:
           # Rimuoviamo la riga cache per evitare l'errore
           # cache: 'npm'
 
+      - name: Create .nojekyll file
+        run: touch .nojekyll
+
       - name: Install Dependencies
         run: npm install
 
       - name: Build
         run: npm run build
+
+      - name: Copy .nojekyll to build folder
+        run: cp .nojekyll build/
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@v4

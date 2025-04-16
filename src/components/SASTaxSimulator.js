@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
-function SASTaxSimulator() {
+const SASTaxSimulator = () => {
     const [fatturato, setFatturato] = useState(100000);
     const [costi, setCosti] = useState(40000);
-    const [aliquotaIres, setAliquotaIres] = useState(24);
+    const [aliquotaIrap, setAliquotaIrap] = useState(3.9); // Default IRAP 3.9%
     const [aliquotaInps, setAliquotaInps] = useState(23.1);
     const [soci, setSoci] = useState([
         {
@@ -102,24 +102,35 @@ function SASTaxSimulator() {
         return irpef;
     };
 
+    // Formatta il valore come valuta EUR
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('it-IT', {
+            style: 'currency',
+            currency: 'EUR'
+        }).format(value);
+    };
+
     // Calcola l'utile aziendale
     const utileAziendale = fatturato - costi;
 
-    // Calcola IRES sulla percentuale impostata
-    const ires = utileAziendale * (aliquotaIres / 100);
+    // Calcola IRAP (3.9% di default)
+    const irap = utileAziendale * (aliquotaIrap / 100);
 
-    // Utile dopo IRES
-    const utileDopoIres = utileAziendale - ires;
+    // Utile dopo IRAP
+    const utileDopoIrap = utileAziendale - irap;
 
     // Calcola risultati per ciascun socio
     const risultatiSoci = soci.map(socio => {
         // Calcola quota utile in base alla percentuale di partecipazione
-        const quotaUtile = (utileDopoIres * socio.percentuale) / 100;
+        const quotaUtile = (utileDopoIrap * socio.percentuale) / 100;
 
         // Calcola importo buoni pasto
         const importoBuoniPasto = socio.buoniPasto ? socio.giornateLavorate * socio.valoreBuoniPasto : 0;
+        // Solo il 75% dei buoni pasto è deducibile
+        const buoniPastoDeducibili = socio.buoniPasto ? importoBuoniPasto * 0.75 : 0;
+
         const buoniPastoImponibili = socio.buoniPasto && socio.valoreBuoniPasto > socio.buoniPastoEsentiFino ?
-            socio.giornateLavorate * (socio.valoreBuoniPasto - socio.buoniPastoEsentiFino) : 0;
+            (socio.giornateLavorate * (socio.valoreBuoniPasto - socio.buoniPastoEsentiFino)) * 0.75 : 0;
 
         // Calcola rimborsi trasferta
         const importoTrasferte = socio.trasferte ? socio.giorniTrasferta * socio.importoTrasfertaGiorno : 0;
@@ -153,6 +164,7 @@ function SASTaxSimulator() {
             socio,
             quotaUtile,
             importoBuoniPasto,
+            buoniPastoDeducibili,
             importoTrasferte,
             contributiInps,
             irpef: irpefNettoInps,
@@ -181,7 +193,7 @@ function SASTaxSimulator() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Fatturato Aziendale ((&euro;))
+                            Fatturato Aziendale (&euro;)
                         </label>
                         <input
                             type="number"
@@ -192,7 +204,7 @@ function SASTaxSimulator() {
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Costi Aziendali ((&euro;))
+                            Costi Aziendali (&euro;)
                         </label>
                         <input
                             type="number"
@@ -206,15 +218,15 @@ function SASTaxSimulator() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Aliquota IRES (%)
+                            Aliquota IRAP (%)
                         </label>
                         <input
                             type="number"
                             min="0"
                             max="100"
                             step="0.1"
-                            value={aliquotaIres}
-                            onChange={(e) => setAliquotaIres(Number(e.target.value))}
+                            value={aliquotaIrap}
+                            onChange={(e) => setAliquotaIrap(Number(e.target.value))}
                             className="w-full p-2 border border-gray-300 rounded"
                         />
                     </div>
@@ -237,15 +249,15 @@ function SASTaxSimulator() {
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="p-3 bg-blue-50 rounded">
                         <span className="text-sm text-gray-600">Utile Aziendale:</span>
-                        <p className="text-lg font-semibold">{utileAziendale.toLocaleString('it-IT')} (&euro;)</p>
+                        <p className="text-lg font-semibold">{formatCurrency(utileAziendale)}</p>
                     </div>
                     <div className="p-3 bg-blue-50 rounded">
-                        <span className="text-sm text-gray-600">IRES ({aliquotaIres}%):</span>
-                        <p className="text-lg font-semibold">{ires.toLocaleString('it-IT')} (&euro;)</p>
+                        <span className="text-sm text-gray-600">IRAP ({aliquotaIrap}%):</span>
+                        <p className="text-lg font-semibold">{formatCurrency(irap)}</p>
                     </div>
                     <div className="p-3 bg-blue-50 rounded">
-                        <span className="text-sm text-gray-600">Utile dopo IRES:</span>
-                        <p className="text-lg font-semibold">{utileDopoIres.toLocaleString('it-IT')} (&euro;)</p>
+                        <span className="text-sm text-gray-600">Utile dopo IRAP:</span>
+                        <p className="text-lg font-semibold">{formatCurrency(utileDopoIrap)}</p>
                     </div>
                 </div>
             </div>
@@ -259,7 +271,7 @@ function SASTaxSimulator() {
                         {scaglioniIrpef.map((scaglione, index) => (
                             <div key={index} className="flex items-center space-x-2">
                                 <div className="flex-1">
-                                    <label className="block text-sm font-medium text-gray-700">Limite ((&euro;))</label>
+                                    <label className="block text-sm font-medium text-gray-700">Limite (&euro;)</label>
                                     <input
                                         type="number"
                                         value={scaglione.limite === Infinity ? 999999999 : scaglione.limite}
@@ -390,7 +402,7 @@ function SASTaxSimulator() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Reddito Esterno ((&euro;))
+                                    Reddito Esterno (&euro;)
                                 </label>
                                 <input
                                     type="number"
@@ -423,12 +435,12 @@ function SASTaxSimulator() {
                                         onChange={(e) => updateSocio(socio.id, 'buoniPasto', e.target.checked)}
                                         className="mr-2"
                                     />
-                                    Buoni Pasto
+                                    Buoni Pasto (deducibili al 75%)
                                 </label>
                                 {socio.buoniPasto && (
                                     <div className="grid grid-cols-2 gap-2">
                                         <div>
-                                            <label className="block text-xs text-gray-600">Valore ((&euro;)/giorno)</label>
+                                            <label className="block text-xs text-gray-600">Valore (&euro;/giorno)</label>
                                             <input
                                                 type="number"
                                                 min="0"
@@ -439,7 +451,7 @@ function SASTaxSimulator() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs text-gray-600">Esente fino a ((&euro;))</label>
+                                            <label className="block text-xs text-gray-600">Esente fino a (&euro;)</label>
                                             <input
                                                 type="number"
                                                 min="0"
@@ -475,7 +487,7 @@ function SASTaxSimulator() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs text-gray-600">(&euro;)/giorno</label>
+                                            <label className="block text-xs text-gray-600">&euro;/giorno</label>
                                             <input
                                                 type="number"
                                                 min="0"
@@ -486,7 +498,7 @@ function SASTaxSimulator() {
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs text-gray-600">Esente fino a ((&euro;))</label>
+                                            <label className="block text-xs text-gray-600">Esente fino a (&euro;)</label>
                                             <input
                                                 type="number"
                                                 min="0"
@@ -516,46 +528,49 @@ function SASTaxSimulator() {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div className="p-3 bg-blue-50 rounded">
                                     <span className="text-sm text-gray-600">Quota Utile:</span>
-                                    <p className="text-lg font-semibold">{risultato.quotaUtile.toLocaleString('it-IT')} (&euro;)</p>
+                                    <p className="text-lg font-semibold">{formatCurrency(risultato.quotaUtile)}</p>
                                 </div>
 
                                 <div className="p-3 bg-blue-50 rounded">
                                     <span className="text-sm text-gray-600">Buoni Pasto:</span>
-                                    <p className="text-lg font-semibold">{risultato.importoBuoniPasto.toLocaleString('it-IT')} (&euro;)</p>
+                                    <p className="text-lg font-semibold">{formatCurrency(risultato.importoBuoniPasto)}</p>
+                                    {risultato.buoniPastoDeducibili > 0 && (
+                                        <p className="text-xs text-gray-500">Deducibili: {formatCurrency(risultato.buoniPastoDeducibili)} (75%)</p>
+                                    )}
                                 </div>
                                 <div className="p-3 bg-blue-50 rounded">
                                     <span className="text-sm text-gray-600">Rimborsi Trasferta:</span>
-                                    <p className="text-lg font-semibold">{risultato.importoTrasferte.toLocaleString('it-IT')} (&euro;)</p>
+                                    <p className="text-lg font-semibold">{formatCurrency(risultato.importoTrasferte)}</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                                 <div className="p-3 bg-yellow-50 rounded">
                                     <span className="text-sm text-gray-600">Contributi INPS:</span>
-                                    <p className="text-lg font-semibold">{risultato.contributiInps.toLocaleString('it-IT')} (&euro;)</p>
+                                    <p className="text-lg font-semibold">{formatCurrency(risultato.contributiInps)}</p>
                                 </div>
                                 <div className="p-3 bg-yellow-50 rounded">
                                     <span className="text-sm text-gray-600">IRPEF:</span>
-                                    <p className="text-lg font-semibold">{risultato.irpef.toLocaleString('it-IT')} (&euro;)</p>
+                                    <p className="text-lg font-semibold">{formatCurrency(risultato.irpef)}</p>
                                 </div>
                                 <div className="p-3 bg-yellow-50 rounded">
                                     <span className="text-sm text-gray-600">Addizionale Regionale:</span>
-                                    <p className="text-lg font-semibold">{risultato.addizionaleRegionale.toLocaleString('it-IT')} (&euro;)</p>
+                                    <p className="text-lg font-semibold">{formatCurrency(risultato.addizionaleRegionale)}</p>
                                 </div>
                                 <div className="p-3 bg-yellow-50 rounded">
                                     <span className="text-sm text-gray-600">Addizionale Comunale:</span>
-                                    <p className="text-lg font-semibold">{risultato.addizionaleComunale.toLocaleString('it-IT')} (&euro;)</p>
+                                    <p className="text-lg font-semibold">{formatCurrency(risultato.addizionaleComunale)}</p>
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="p-3 bg-red-50 rounded">
                                     <span className="text-sm text-gray-600">Totale Imposte:</span>
-                                    <p className="text-lg font-semibold">{risultato.totaleImposte.toLocaleString('it-IT')} (&euro;)</p>
+                                    <p className="text-lg font-semibold">{formatCurrency(risultato.totaleImposte)}</p>
                                 </div>
                                 <div className="p-3 bg-green-50 rounded">
                                     <span className="text-sm text-gray-600">Netto Percepito:</span>
-                                    <p className="text-lg font-semibold">{risultato.nettoPercepito.toLocaleString('it-IT')} (&euro;)</p>
+                                    <p className="text-lg font-semibold">{formatCurrency(risultato.nettoPercepito)}</p>
                                 </div>
                             </div>
                         </div>
@@ -569,5 +584,6 @@ function SASTaxSimulator() {
             </div>
         </div>
     );
-}
+};
+
 export default SASTaxSimulator;

@@ -1,5 +1,5 @@
 import React from 'react';
-import SASTaxSimulator  from './components/SASTaxSimulator';
+import SASTaxSimulator from './components/SASTaxSimulator';
 
 function App() {
     return (

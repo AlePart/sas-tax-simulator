@@ -1,13 +1,13 @@
 # Simulatore Tassazione SAS
 
-Un'applicazione web per simulare la tassazione di una Società in Accomandita Semplice (SAS) in Italia, con funzionalità complete per il calcolo delle imposte per soci di capitale e operativi.
+Un'applicazione web per simulare la tassazione di una Società in Accomandita Semplice (SAS) in Italia.
 
 ## Caratteristiche
 
-- Calcolo dell'utile aziendale e dell'IRES
+- Calcolo dell'utile aziendale e dell'IRAP (aliquota predefinita 3,9%)
 - Gestione di soci operativi e di capitale con percentuali di partecipazione diverse
 - Calcolo dei contributi INPS per i soci operativi
-- Configurazione completa di buoni pasto e rimborsi trasferta
+- Configurazione completa di buoni pasto (deducibili al 75%) e rimborsi trasferta
 - Calcolo IRPEF con scaglioni personalizzabili
 - Addizionali regionali e comunali
 - Calcolo del netto percepito per ogni socio
@@ -15,15 +15,17 @@ Un'applicazione web per simulare la tassazione di una Società in Accomandita Sem
 ## Come usare il simulatore
 
 1. Inserisci i dati aziendali (fatturato, costi)
-2. Configura le aliquote fiscali (IRES, INPS, scaglioni IRPEF)
+2. Configura le aliquote fiscali (IRAP, INPS, scaglioni IRPEF)
 3. Aggiungi e configura i soci (tipo, percentuale di partecipazione, redditi esterni)
 4. Per i soci operativi, configura buoni pasto e trasferte
 5. Visualizza i risultati dettagliati per ogni socio
 
-## Accesso rapido
+## Informazioni fiscali
 
-La pagina principale del sito ha un link al simulatore.
-È anche possibile accedere direttamente alla pagina del simulatore tramite il percorso `/sasSim`.
+- Le SAS sono soggette a IRAP (non a IRES)
+- I buoni pasto sono deducibili al 75%
+- I rimborsi trasferta sono esenti fino a una soglia definita (default 46,48€/giorno)
+- L'aliquota INPS è configurabile (default 23,1%)
 
 ## Sviluppo
 
@@ -36,7 +38,7 @@ La pagina principale del sito ha un link al simulatore.
 
 ```bash
 # Clona il repository
-git clone https://github.com/[tuo-username]/sas-tax-simulator.git
+git clone https://github.com/alepart/sas-tax-simulator.git
 
 # Entra nella directory
 cd sas-tax-simulator
@@ -46,13 +48,6 @@ npm install
 
 # Avvia il server di sviluppo
 npm start
-```
-
-### Deploy su GitHub Pages
-
-```bash
-# Configura il deploy
-npm run deploy
 ```
 
 ## Disclaimer
