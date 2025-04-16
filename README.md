@@ -7,7 +7,7 @@ Un'applicazione web per simulare la tassazione di una Società in Accomandita Sem
 - Calcolo dell'utile aziendale e dell'IRAP (aliquota predefinita 3,9%)
 - Gestione di soci operativi e di capitale con percentuali di partecipazione diverse
 - Calcolo dei contributi INPS per i soci operativi
-- Configurazione completa di buoni pasto (deducibili al 75%) e rimborsi trasferta
+- Configurazione completa di buoni pasto  e rimborsi trasferta
 - Calcolo IRPEF con scaglioni personalizzabili
 - Addizionali regionali e comunali
 - Calcolo del netto percepito per ogni socio
@@ -23,7 +23,6 @@ Un'applicazione web per simulare la tassazione di una Società in Accomandita Sem
 ## Informazioni fiscali
 
 - Le SAS sono soggette a IRAP (non a IRES)
-- I buoni pasto sono deducibili al 75%
 - I rimborsi trasferta sono esenti fino a una soglia definita (default 46,48€/giorno)
 - L'aliquota INPS è configurabile (default 23,1%)
 

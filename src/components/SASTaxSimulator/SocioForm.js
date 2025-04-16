@@ -96,7 +96,7 @@ const SocioForm = ({ socio, updateSocio, rimuoviSocio }) => {
                                 onChange={(e) => updateSocio(socio.id, 'buoniPasto', e.target.checked)}
                                 className="mr-2"
                             />
-                            Buoni Pasto (deducibili al 75%)
+                            Buoni Pasto 
                         </label>
                         {socio.buoniPasto && (
                             <div className="grid grid-cols-2 gap-2">

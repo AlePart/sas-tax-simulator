@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Stili per la stampa */
+@media print {
+    .sidebar {
+        display: none !important;
+    }
+
+    body {
+        font-size: 12pt;
+    }
+
+    /* Nascondi elementi non necessari per la stampa */
+    button,
+    input[type="checkbox"],
+    select,
+    input[type="number"],
+    input[type="text"] {
+        display: none;
+    }
+
+    /* Forza il colore di sfondo a bianco */
+    body, div, main {
+        background-color: white !important;
+        color: black !important;
+    }
+
+    /* Migliora la leggibilità */
+    h1, h2, h3 {
+        color: black !important;
+        page-break-after: avoid;
+    }
+
+    /* Evita interruzioni di pagina indesiderate */
+    .mb-6 {
+        page-break-inside: avoid;
+    }
+
+    /* Rimuovi le ombre */
+    .shadow, .shadow-lg {
+        box-shadow: none !important;
+    }
+}
