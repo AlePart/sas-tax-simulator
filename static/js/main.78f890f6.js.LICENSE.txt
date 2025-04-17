@@ -1,3 +1,10 @@
+/* @license
+Papa Parse
+v5.5.2
+https://github.com/mholt/PapaParse
+License: MIT
+*/
+
 /*! decimal.js-light v2.5.1 https://github.com/MikeMcl/decimal.js-light/LICENCE */
 
 /**
