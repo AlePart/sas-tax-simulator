@@ -49,7 +49,7 @@ const SessionControls = ({ simulationData, onImportData, onResetSession }) => {
     };
 
     return (
-        <div className="fixed bottom-4 right-4 flex space-x-2 print:hidden z-20">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-md p-3 flex justify-center space-x-4 z-10">
             <button
                 onClick={handleExport}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded text-sm flex items-center"
