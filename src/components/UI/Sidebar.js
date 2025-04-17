@@ -10,7 +10,7 @@ const Sidebar = ({ fatturato, costi, costiSociOperativi, utileAziendale, irap, u
     const totaleNettoPercepito = risultatiSoci.reduce((acc, r) => acc + r.nettoPercepito, 0);
 
     return (
-        <div className="hidden xl:block fixed right-4 top-4 w-64 bg-white shadow-lg rounded-lg p-4 border-l-4 border-blue-500 h-[calc(100vh-2rem)] overflow-y-auto">
+        <div className="hidden 2xl:block fixed right-4 top-4 w-64 bg-white shadow-lg rounded-lg p-4 border-l-4 border-blue-500 h-[calc(100vh-2rem)] overflow-y-auto">
             <h3 className="text-lg font-semibold text-blue-800 mb-4 border-b pb-2">Riepilogo Simulazione</h3>
 
             <div className="space-y-4">
