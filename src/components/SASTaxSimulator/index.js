@@ -88,6 +88,89 @@ const SASTaxSimulator = () => {
         setCookie('sas-simulator-data', dataToSave);
     }, [fatturato, costi, aliquotaIrap, aliquotaInps, soci, scaglioniIrpef, aliqRegionale, aliqComunale]);
 
+    // Funzione per gestire l'importazione dei dati
+    const handleImportData = (importedData) => {
+        try {
+            // Carica i dati aziendali
+            const { datiAzienda, tassazione, soci: importedSoci } = importedData;
+
+            if (datiAzienda) {
+                if (datiAzienda.fatturato !== undefined) setFatturato(datiAzienda.fatturato);
+                if (datiAzienda.costi !== undefined) setCosti(datiAzienda.costi);
+                if (datiAzienda.aliquotaIrap !== undefined) setAliquotaIrap(datiAzienda.aliquotaIrap);
+                if (datiAzienda.aliquotaInps !== undefined) setAliquotaInps(datiAzienda.aliquotaInps);
+            }
+
+            // Carica le configurazioni fiscali
+            if (tassazione) {
+                if (tassazione.scaglioniIrpef && Array.isArray(tassazione.scaglioniIrpef)) {
+                    setScaglioniIrpef(tassazione.scaglioniIrpef);
+                }
+                if (tassazione.aliqRegionale !== undefined) setAliqRegionale(tassazione.aliqRegionale);
+                if (tassazione.aliqComunale !== undefined) setAliqComunale(tassazione.aliqComunale);
+            }
+
+            // Carica i dati dei soci
+            if (importedSoci && Array.isArray(importedSoci)) {
+                setSoci(importedSoci);
+            }
+
+            // Notifica di successo
+            alert('Simulazione importata con successo!');
+        } catch (error) {
+            console.error('Errore durante l\'importazione:', error);
+            alert('Si è verificato un errore durante l\'importazione: ' + error.message);
+        }
+    };
+
+    // Funzione per resettare tutti i dati della simulazione
+    const handleResetSession = () => {
+        // Ripristina i valori predefiniti
+        setFatturato(100000);
+        setCosti(40000);
+        setAliquotaIrap(3.9);
+        setAliquotaInps(23.1);
+
+        // Ripristina i soci predefiniti
+        setSoci([
+            {
+                ...creaNuovoSocio(1, "Mario Rossi"),
+                tipo: "operativo",
+                percentuale: 60,
+                redditoEsterno: 0,
+                giornateLavorate: 220,
+                buoniPasto: true,
+                valoreBuoniPasto: 8,
+                buoniPastoEsentiFino: 4,
+                trasferte: true,
+                giorniTrasferta: 30,
+                importoTrasfertaGiorno: 50,
+                trasfertaEsenteFino: 46.48,
+            },
+            {
+                ...creaNuovoSocio(2, "Giulia Bianchi"),
+                tipo: "capitale",
+                percentuale: 40,
+                redditoEsterno: 30000,
+            }
+        ]);
+
+        // Ripristina gli scaglioni IRPEF predefiniti
+        setScaglioniIrpef([
+            { limite: 15000, aliquota: 23 },
+            { limite: 28000, aliquota: 25 },
+            { limite: 50000, aliquota: 35 },
+            { limite: Infinity, aliquota: 43 }
+        ]);
+
+        // Ripristina le aliquote predefinite
+        setAliqRegionale(1.73);
+        setAliqComunale(0.8);
+
+        // Elimina il cookie di salvataggio
+        setCookie('sas-simulator-data', null);
+    };
+
     // Calcola i costi per soci operativi
     const costiSociOperativi = calcolaCostiSociOperativi(soci);
 
@@ -209,7 +292,11 @@ const SASTaxSimulator = () => {
             />
 
             {/* Controlli per la sessione */}
-            <SessionControls simulationData={simulationData} />
+            <SessionControls
+                simulationData={simulationData}
+                onImportData={handleImportData}
+                onResetSession={handleResetSession}
+            />
         </div>
     );
 };
