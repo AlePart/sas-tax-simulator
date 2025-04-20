@@ -102,9 +102,13 @@ const Sidebar = ({
                                     <span>Imposte:</span>
                                     <span className="text-red-600">{formatCurrency(risultato.totaleImposte)}</span>
                                 </div>
-                                <div className="text-xs flex justify-between font-medium">
+                                <div className="text-xs flex justify-between">
                                     <span>Netto:</span>
-                                    <span className="text-green-600">{formatCurrency(risultato.nettoPercepito)}</span>
+                                    <span className="text-green-600">{formatCurrency(risultato.quotaUtile - risultato.totaleImposte)}</span>
+                                </div>
+                                <div className="text-xs flex justify-between font-medium">
+                                    <span>Netto Percepito:</span>
+                                    <span className="text-green-800">{formatCurrency(risultato.nettoPercepito)}</span>
                                 </div>
                             </li>
                         ))}
