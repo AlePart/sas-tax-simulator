@@ -249,11 +249,11 @@ export const calcolaRisultatiSocio = (
     );
 
     // Calcola IRPEF
-    const irpef = calcolaIrpef(redditoImponibileTotale, scaglioniIrpef);
+    const irpef = calcolaIrpef(quotaUtile, scaglioniIrpef);
 
     // Calcola addizionali
-    const addizionaleRegionale = calcolaAddizionaleRegionale(redditoImponibileTotale, aliqRegionale);
-    const addizionaleComunale = calcolaAddizionaleComunale(redditoImponibileTotale, aliqComunale);
+    const addizionaleRegionale = calcolaAddizionaleRegionale(quotaUtile, aliqRegionale);
+    const addizionaleComunale = calcolaAddizionaleComunale(quotaUtile, aliqComunale);
 
     // Calcola totale imposte
     const totaleImposte = contributiInps + irpef + addizionaleRegionale + addizionaleComunale;
