@@ -129,29 +129,19 @@ const calcolaContributiInps = (quotaUtile, aliquotaInps) => {
 
 /**
  * Calcola l'IRPEF sulla base degli scaglioni e del reddito imponibile
- * @param {number} redditoImponibile - Reddito imponibile totale
- * @param {Array} scaglioniIrpef - Array di scaglioni IRPEF
+ * @param {number} reddito - Reddito imponibile totale
  * @returns {number} IRPEF da versare
  */
-const calcolaIrpef = (redditoImponibile, scaglioniIrpef) => {
-    let irpef = 0;
-    let redditoRimanente = redditoImponibile;
-    let scaglionePrecedente = 0;
-
-    for (const scaglione of scaglioniIrpef) {
-        if (redditoRimanente <= 0) break;
-
-        const redditoScaglione = Math.min(
-            redditoRimanente,
-            scaglione.limite - scaglionePrecedente
-        );
-
-        irpef += redditoScaglione * (scaglione.aliquota / 100);
-        redditoRimanente -= redditoScaglione;
-        scaglionePrecedente = scaglione.limite;
+const calcolaIrpef = (reddito) => {
+    if (reddito <= 15000) {
+        return reddito * 0.23;
+    } else if (reddito <= 28000) {
+        return 15000 * 0.23 + (reddito - 15000) * 0.25;
+    } else if (reddito <= 50000) {
+        return 15000 * 0.23 + 13000 * 0.25 + (reddito - 28000) * 0.35;
+    } else {
+        return 15000 * 0.23 + 13000 * 0.25 + 22000 * 0.35 + (reddito - 50000) * 0.43;
     }
-
-    return irpef;
 };
 
 /**
@@ -203,6 +193,7 @@ export const calcolaRisultatiSocio = (
     let importoTrasferteEsenti = 0;
     let importoTrasferteNonEsenti = 0;
 
+    let contributiInps = 0;
     if (socio.tipo === "operativo") {
         // Buoni pasto
         if (socio.buoniPasto) {
@@ -235,10 +226,12 @@ export const calcolaRisultatiSocio = (
                 importoTrasferteNonEsenti = (socio.importoTrasfertaGiorno - sogliaTrasferte) * socio.giorniTrasferta;
             }
         }
+
+        contributiInps = calcolaContributiInps(quotaUtile, aliquotaInps);
     }
 
-    // Calcola contributi INPS
-    const contributiInps = calcolaContributiInps(quotaUtile, aliquotaInps);
+    
+    
 
     // Calcola il reddito imponibile totale
     const redditoImponibileTotale = calcolaRedditoImponibileTotale(
@@ -248,9 +241,9 @@ export const calcolaRisultatiSocio = (
         importoTrasferteNonEsenti
     );
 
-    // Calcola IRPEF
+    // Calcola IRPEF 
 
-    const irpef = calcolaIrpef(redditoImponibileTotale, scaglioniIrpef) - calcolaIrpef(socio.redditoEsterno,scaglioniIrpef);
+    const irpef = calcolaIrpef(redditoImponibileTotale) - calcolaIrpef(socio.redditoEsterno);
 
     // Calcola addizionali
     const addizionaleRegionale = calcolaAddizionaleRegionale(quotaUtile, aliqRegionale);
