@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import AziendaForm from './AziendaForm';
-import TassazioneForm from './TassazioneForm';
 import SocioList from './SocioList';
 import SocioResults from './SocioResults';
 import ReportCharts from './ReportCharts';
@@ -168,14 +167,7 @@ const SASTaxSimulator = () => {
                 costiNonEsenti={costiNonEsenti}
             />
 
-            <TassazioneForm
-                scaglioniIrpef={scaglioniIrpef}
-                setScaglioniIrpef={setScaglioniIrpef}
-                aliqRegionale={aliqRegionale}
-                setAliqRegionale={setAliqRegionale}
-                aliqComunale={aliqComunale}
-                setAliqComunale={setAliqComunale}
-            />
+
 
             <SocioList
                 soci={soci}
