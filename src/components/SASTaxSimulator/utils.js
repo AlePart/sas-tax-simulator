@@ -249,7 +249,8 @@ export const calcolaRisultatiSocio = (
     );
 
     // Calcola IRPEF
-    const irpef = calcolaIrpef(quotaUtile, scaglioniIrpef);
+
+    const irpef = calcolaIrpef(redditoImponibileTotale, scaglioniIrpef) - calcolaIrpef(socio.redditoEsterno,scaglioniIrpef);
 
     // Calcola addizionali
     const addizionaleRegionale = calcolaAddizionaleRegionale(quotaUtile, aliqRegionale);
