@@ -17,7 +17,9 @@ const AziendaForm = ({
     utileAziendale,
     irap,
     utileDopoIrap,
-    costiSociOperativi
+    costiSociOperativi,
+    costiEsenti,
+    costiNonEsenti
 }) => {
     return (
         <Card title="Dati Aziendali">
@@ -79,9 +81,22 @@ const AziendaForm = ({
 
             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <InfoBox
-                    label="Costi Buoni Pasto/Trasferte:"
+                    label="Costi Soci Operativi Totali:"
                     value={formatCurrency(costiSociOperativi)}
                 />
+                <InfoBox
+                    label="di cui Esenti:"
+                    value={formatCurrency(costiEsenti)}
+                    bgColor="bg-green-50"
+                />
+                <InfoBox
+                    label="di cui Non Esenti:"
+                    value={formatCurrency(costiNonEsenti)}
+                    bgColor="bg-yellow-50"
+                />
+            </div>
+
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                 <InfoBox
                     label="Utile Aziendale:"
                     value={formatCurrency(utileAziendale)}
@@ -90,14 +105,18 @@ const AziendaForm = ({
                     label={`IRAP (${aliquotaIrap}%):`}
                     value={formatCurrency(irap)}
                 />
-            </div>
-
-            <div className="mt-2 grid grid-cols-1 md:grid-cols-1 gap-4">
                 <InfoBox
                     label="Utile dopo IRAP:"
                     value={formatCurrency(utileDopoIrap)}
                     bgColor="bg-green-50"
                 />
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-50 rounded">
+                <p className="text-sm text-gray-600">
+                    <strong>Nota:</strong> L'utile aziendale è calcolato sottraendo dal fatturato i costi base e solo i costi esenti dei soci operativi.
+                    La parte non esente di buoni pasto e trasferte è invece considerata come parte del reddito imponibile dei singoli soci.
+                </p>
             </div>
         </Card>
     );

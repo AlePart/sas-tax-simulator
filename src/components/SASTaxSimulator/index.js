@@ -33,9 +33,11 @@ const SASTaxSimulator = () => {
             giornateLavorate: 220,
             buoniPasto: true,
             valoreBuoniPasto: 8,
+            buoniPastoEsentiFino: 8,
             trasferte: true,
             giorniTrasferta: 30,
             importoTrasfertaGiorno: 50,
+            trasfertaEsenteFino: 46.48,
         },
         {
             ...creaNuovoSocio(2, "Giulia Bianchi"),
@@ -88,11 +90,16 @@ const SASTaxSimulator = () => {
         setCookie('sas-simulator-data', dataToSave);
     }, [fatturato, costi, aliquotaIrap, aliquotaInps, soci, scaglioniIrpef, aliqRegionale, aliqComunale]);
 
-    // Calcola i costi per soci operativi
-    const costiSociOperativi = calcolaCostiSociOperativi(soci);
+    // Calcola i costi per soci operativi con dettaglio esente/non esente
+    const costiInfo = calcolaCostiSociOperativi(soci);
+    const costiSociOperativi = costiInfo.totale;
 
-    // Calcola l'utile aziendale considerando i costi per soci operativi
-    const utileAziendale = fatturato - costi - costiSociOperativi;
+    // Estrae il dettaglio dei costi non esenti che impattano sull'utile aziendale
+    const costiNonEsenti = costiInfo.dettaglio.buoniPastoNonEsenti + costiInfo.dettaglio.trasferteNonEsenti;
+
+    // Calcola l'utile aziendale considerando i costi per soci operativi, ma solo la parte esente
+    // La parte non esente impatta sull'imponibile del socio ma non sull'utile aziendale
+    const utileAziendale = fatturato - costi - costiSociOperativi + costiNonEsenti;
 
     // Calcola IRAP
     const irap = utileAziendale * (aliquotaIrap / 100);
@@ -123,6 +130,8 @@ const SASTaxSimulator = () => {
             aliquotaIrap,
             aliquotaInps,
             costiSociOperativi,
+            costiEsenti: costiSociOperativi - costiNonEsenti,
+            costiNonEsenti,
             utileAziendale,
             irap,
             utileDopoIrap
@@ -155,6 +164,8 @@ const SASTaxSimulator = () => {
                 irap={irap}
                 utileDopoIrap={utileDopoIrap}
                 costiSociOperativi={costiSociOperativi}
+                costiEsenti={costiSociOperativi - costiNonEsenti}
+                costiNonEsenti={costiNonEsenti}
             />
 
             <TassazioneForm
@@ -184,6 +195,8 @@ const SASTaxSimulator = () => {
                 fatturato={fatturato}
                 costi={costi}
                 costiSociOperativi={costiSociOperativi}
+                costiEsenti={costiSociOperativi - costiNonEsenti}
+                costiNonEsenti={costiNonEsenti}
                 utileAziendale={utileAziendale}
                 irap={irap}
                 utileDopoIrap={utileDopoIrap}
@@ -201,6 +214,8 @@ const SASTaxSimulator = () => {
                 fatturato={fatturato}
                 costi={costi}
                 costiSociOperativi={costiSociOperativi}
+                costiEsenti={costiSociOperativi - costiNonEsenti}
+                costiNonEsenti={costiNonEsenti}
                 utileAziendale={utileAziendale}
                 irap={irap}
                 utileDopoIrap={utileDopoIrap}

@@ -6,8 +6,23 @@ import { formatCurrency } from './utils';
  * Componente per visualizzare i risultati di un socio
  */
 const SocioResults = ({ risultato }) => {
-    const { socio, quotaUtile, importoBuoniPasto, importoTrasferte, contributiInps,
-        irpef, addizionaleRegionale, addizionaleComunale, totaleImposte, nettoPercepito } = risultato;
+    const {
+        socio,
+        quotaUtile,
+        importoBuoniPasto,
+        importoBuoniPastoEsenti,
+        importoBuoniPastoNonEsenti,
+        importoTrasferte,
+        importoTrasferteEsenti,
+        importoTrasferteNonEsenti,
+        contributiInps,
+        redditoImponibileTotale,
+        irpef,
+        addizionaleRegionale,
+        addizionaleComunale,
+        totaleImposte,
+        nettoPercepito
+    } = risultato;
 
     return (
         <div className="mb-6 p-4 bg-white rounded-lg shadow">
@@ -24,23 +39,61 @@ const SocioResults = ({ risultato }) => {
                 {socio.tipo === "operativo" && (
                     <>
                         <InfoBox
-                            label="Buoni Pasto:"
+                            label="Buoni Pasto Totali:"
                             value={formatCurrency(importoBuoniPasto)}
                         />
                         <InfoBox
-                            label="Rimborsi Trasferta:"
+                            label="Rimborsi Trasferta Totali:"
                             value={formatCurrency(importoTrasferte)}
                         />
                     </>
                 )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            {socio.tipo === "operativo" && importoBuoniPasto > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <InfoBox
+                        label="Buoni Pasto Esenti:"
+                        value={formatCurrency(importoBuoniPastoEsenti)}
+                        bgColor="bg-green-50"
+                    />
+                    <InfoBox
+                        label="Buoni Pasto Non Esenti:"
+                        value={formatCurrency(importoBuoniPastoNonEsenti)}
+                        bgColor="bg-yellow-50"
+                    />
+                </div>
+            )}
+
+            {socio.tipo === "operativo" && importoTrasferte > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <InfoBox
+                        label="Trasferte Esenti:"
+                        value={formatCurrency(importoTrasferteEsenti)}
+                        bgColor="bg-green-50"
+                    />
+                    <InfoBox
+                        label="Trasferte Non Esenti:"
+                        value={formatCurrency(importoTrasferteNonEsenti)}
+                        bgColor="bg-yellow-50"
+                    />
+                </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <InfoBox
+                    label="Reddito Imponibile Totale:"
+                    value={formatCurrency(redditoImponibileTotale)}
+                    bgColor="bg-blue-50"
+                />
                 <InfoBox
                     label="Contributi INPS:"
                     value={formatCurrency(contributiInps)}
                     bgColor="bg-yellow-50"
                 />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <InfoBox
                     label="IRPEF:"
                     value={formatCurrency(irpef)}
@@ -70,6 +123,13 @@ const SocioResults = ({ risultato }) => {
                     bgColor="bg-green-50"
                 />
             </div>
+
+            {socio.tipo === "operativo" && (
+                <div className="mt-3 text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                    <p>Il netto percepito include: la quota di utile al netto delle imposte, più la parte esente di buoni pasto e trasferte.</p>
+                    <p>La parte non esente è inclusa nel reddito imponibile e quindi già considerata nel calcolo delle imposte.</p>
+                </div>
+            )}
         </div>
     );
 };

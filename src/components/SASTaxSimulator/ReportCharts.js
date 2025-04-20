@@ -10,6 +10,8 @@ const ReportCharts = ({
     fatturato,
     costi,
     costiSociOperativi,
+    costiEsenti,
+    costiNonEsenti,
     utileAziendale,
     irap,
     utileDopoIrap,
@@ -26,7 +28,8 @@ const ReportCharts = ({
                                 <Pie
                                     data={[
                                         { name: 'Costi Base', value: costi },
-                                        { name: 'Costi Soci Operativi', value: costiSociOperativi },
+                                        { name: 'Costi Soci (Esenti)', value: costiEsenti },
+                                        { name: 'Costi Soci (Non Esenti)', value: costiNonEsenti },
                                         { name: 'IRAP', value: irap },
                                         { name: 'Utile Netto', value: utileDopoIrap }
                                     ]}
@@ -42,6 +45,7 @@ const ReportCharts = ({
                                     <Cell fill="#FF8042" />
                                     <Cell fill="#00C49F" />
                                     <Cell fill="#FFBB28" />
+                                    <Cell fill="#FF0000" />
                                     <Cell fill="#0088FE" />
                                 </Pie>
                                 <Tooltip formatter={(value) => formatCurrency(value)} />
@@ -106,9 +110,14 @@ const ReportCharts = ({
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{((costi / fatturato) * 100).toFixed(2)}%</td>
                             </tr>
                             <tr>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Costi Soci Operativi</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatCurrency(costiSociOperativi)}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{((costiSociOperativi / fatturato) * 100).toFixed(2)}%</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Costi Soci Operativi (Esenti)</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatCurrency(costiEsenti)}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{((costiEsenti / fatturato) * 100).toFixed(2)}%</td>
+                            </tr>
+                            <tr>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Costi Soci Operativi (Non Esenti)</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatCurrency(costiNonEsenti)}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{((costiNonEsenti / fatturato) * 100).toFixed(2)}%</td>
                             </tr>
                             <tr>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Utile Aziendale</td>
@@ -128,6 +137,14 @@ const ReportCharts = ({
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-50 rounded">
+                <p className="text-sm">
+                    <strong>Nota fiscale:</strong> I costi non esenti (parte eccedente le soglie di esenzione di buoni pasto e trasferte)
+                    sono considerati reddito del socio e non riducono l'utile aziendale. Questo riflette il trattamento fiscale corretto
+                    secondo la normativa italiana.
+                </p>
             </div>
         </Card>
     );
