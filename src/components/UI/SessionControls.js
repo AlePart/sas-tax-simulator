@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-
+import { deleteAutoData } from '../../utils/autoSaveUtils';
 /**
  * Componente per i controlli di gestione della sessione
  * @param {Object} props
@@ -45,7 +45,11 @@ const SessionControls = ({ simulationData, onReset, onResetComplete }) => {
 
             // Notifica al genitore che il reset è completato
             if (onResetComplete) {
+
+                deleteAutoData();
                 onResetComplete();
+                // reload default data
+                onReset();
             }
         } else {
             // Mostra il dialogo di conferma

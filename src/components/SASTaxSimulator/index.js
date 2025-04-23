@@ -11,7 +11,7 @@ import {
     calcolaRisultatiSocio,
     creaNuovoSocio
 } from './utils';
-import { saveAutoData, loadAutoData, clearAutoData } from '../../utils/autoSaveUtils';
+import { saveAutoData, loadAutoData, deleteAutoData } from '../../utils/autoSaveUtils';
 
 /**
  * Componente principale del simulatore di tassazione SAS
@@ -145,7 +145,7 @@ const SASTaxSimulator = () => {
         setTimeout(() => {
             try {
                 // Pulisci i dati salvati
-                const resetSuccess = clearAutoData();
+                const resetSuccess = deleteAutoData();
 
                 if (resetSuccess) {
                     setLoadingMessage('Ripristino valori predefiniti...');
