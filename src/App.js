@@ -20,6 +20,7 @@ function App() {
         <div className="App">
             <SuspenseContainer
                 loadingMessage="Inizializzazione Simulatore Tassazione SAS..."
+                loadingType="spinner"
             >
                 <SASTaxSimulator />
             </SuspenseContainer>
