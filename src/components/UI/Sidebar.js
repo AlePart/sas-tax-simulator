@@ -41,11 +41,11 @@ const Sidebar = ({
                             <span className="font-medium">{formatCurrency(costiSociOperativi)}</span>
                         </li>
                         <li className="flex justify-between text-green-600">
-                            <span>- di cui esenti:</span>
+                            <span>- di cui deducibili:</span>
                             <span className="font-medium">{formatCurrency(costiEsenti)}</span>
                         </li>
                         <li className="flex justify-between text-yellow-600">
-                            <span>- di cui non esenti:</span>
+                            <span>- di cui non deducibili:</span>
                             <span className="font-medium">{formatCurrency(costiNonEsenti)}</span>
                         </li>
                         <li className="flex justify-between">
