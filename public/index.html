@@ -15,10 +15,107 @@
     <!-- Meta per stampa -->
     <meta name="robots" content="noindex, nofollow" />
     <meta name="copyright" content="2025 Key-Code. Tutti i diritti riservati." />
+
+    <!-- Stile inline per lo spinner di caricamento iniziale -->
+    <style>
+        @keyframes loadingSpinnerRotate {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .initial-loading-spinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 9999;
+        }
+
+        .initial-loading-spinner__container {
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .initial-loading-spinner__title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+
+        .initial-loading-spinner__icon {
+            display: flex;
+            justify-content: center;
+            padding: 1rem 0;
+        }
+
+        .initial-loading-spinner__svg {
+            width: 3rem;
+            height: 3rem;
+            color: #2563eb;
+            animation: loadingSpinnerRotate 1s linear infinite;
+        }
+
+        .initial-loading-spinner__footer {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-top: 1rem;
+        }
+    </style>
 </head>
 <body>
     <noscript>&egrave; necessario abilitare JavaScript per utilizzare questa applicazione.</noscript>
+
+    <!-- Spinner di caricamento iniziale (visibile immediatamente) -->
+    <div id="initial-loading-spinner" class="initial-loading-spinner">
+        <div class="initial-loading-spinner__container">
+            <div class="initial-loading-spinner__title">Caricamento Simulatore...</div>
+            <div class="initial-loading-spinner__icon">
+                <svg class="initial-loading-spinner__svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle opacity="0.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path opacity="0.75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+            </div>
+            <div class="initial-loading-spinner__footer">Simulatore Tassazione SAS | Key-Code</div>
+        </div>
+    </div>
+
+    <!-- Contenitore radice React (inizialmente vuoto) -->
     <div id="root"></div>
+
+    <!-- Script per rimuovere lo spinner iniziale -->
+    <script>
+        // Questa funzione rimuoverà lo spinner una volta che l'app React è caricata
+        window.removeInitialLoadingSpinner = function () {
+            const spinner = document.getElementById('initial-loading-spinner');
+            if (spinner) {
+                // Aggiunge una transizione di dissolvenza
+                spinner.style.transition = 'opacity 0.3s ease-out';
+                spinner.style.opacity = '0';
+
+                // Rimuove completamente dopo la transizione
+                setTimeout(() => {
+                    spinner.parentNode.removeChild(spinner);
+                }, 300);
+            }
+        };
+    </script>
+
     <script src="https://cdn.counter.dev/script.js" data-id="cfd53edb-765b-4aa7-a71d-5cf84f810247" data-utcoffset="2"></script>
 </body>
 </html>
