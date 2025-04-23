@@ -1,121 +1,93 @@
 import React, { useState } from 'react';
 
 /**
- * Componente per il controllo della sessione di simulazione
- * Consente di salvare manualmente, esportare e ripristinare i dati della simulazione
- * 
- * @param {Object} props - Props del componente
- * @param {Object} props.simulationData - Dati completi della simulazione corrente
- * @param {Function} props.onSave - Funzione per salvare manualmente i dati
- * @param {Function} props.onReset - Funzione per cancellare i dati salvati
+ * Componente per i controlli di gestione della sessione
+ * @param {Object} props
+ * @param {Object} props.simulationData - Dati completi della simulazione
+ * @param {Function} props.onReset - Funzione chiamata quando si resetta la simulazione
+ * @param {Function} props.onResetComplete - Callback eseguito al completamento del reset
  */
-const SessionControls = ({ simulationData, onSave, onReset }) => {
-    const [message, setMessage] = useState(null);
+const SessionControls = ({ simulationData, onReset, onResetComplete }) => {
+    const [showConfirmReset, setShowConfirmReset] = useState(false);
+    const [isExporting, setIsExporting] = useState(false);
 
-    /**
-     * Mostra un messaggio temporaneo all'utente
-     * @param {string} text - Testo del messaggio
-     * @param {string} type - Tipo di messaggio ('success', 'error', 'info')
-     */
-    const showMessage = (text, type = 'info') => {
-        setMessage({ text, type });
-        setTimeout(() => setMessage(null), 3000);
-    };
+    // Gestione dell'esportazione dati in formato JSON
+    const handleExport = () => {
+        setIsExporting(true);
 
-
-    /**
-     * Esporta i dati della simulazione come file JSON
-     */
-    const esportaSimulazione = () => {
         try {
-            // Crea un Blob con i dati
-            const jsonData = JSON.stringify(simulationData, null, 2);
-            const blob = new Blob([jsonData], { type: 'application/json' });
-
-            // Crea un URL per il blob
+            // Crea un blob JSON con i dati della simulazione
+            const dataStr = JSON.stringify(simulationData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
 
-            // Crea un elemento link per scaricare il file
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `simulazione-sas-${new Date().toISOString().slice(0, 10)}.json`;
-            a.click();
+            // Crea e simula il click su un link di download
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `simulazione-sas-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
 
-            // Rilascia l'URL
             URL.revokeObjectURL(url);
-
-            showMessage('Simulazione esportata come file.', 'success');
         } catch (error) {
-            console.error('Errore durante l\'esportazione:', error);
-            showMessage('Errore durante l\'esportazione.', 'error');
+            console.error('Errore durante l\'esportazione dei dati:', error);
+            alert('Si è verificato un errore durante l\'esportazione dei dati.');
+        } finally {
+            setIsExporting(false);
         }
     };
 
-    /**
-     * Reset ai valori predefiniti
-     */
-    const resetSimulazione = () => {
-        if (window.confirm('Sei sicuro di voler resettare la simulazione? Tutti i dati inseriti andranno persi.')) {
-            try {
-                // Elimina i dati salvati da localStorage e cookie
-                onReset();
+    // Gestione del reset dei dati
+    const handleReset = () => {
+        if (showConfirmReset) {
 
-                // Elimina anche il cookie con il nome originale (per compatibilità)
-                document.cookie = `sas-simulator-data=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+            // Nascondi il dialogo di conferma
+            setShowConfirmReset(false);
 
-                showMessage('Simulazione reimpostata ai valori predefiniti.', 'info');
-
-                // Attendi un momento per mostrare il messaggio prima del reload
-                setTimeout(() => {
-                    // Ricarica la pagina per reinizializzare lo stato
-                    window.location.reload();
-                }, 1500);
-            } catch (error) {
-                console.error('Errore durante il reset:', error);
-                showMessage('Errore durante il reset. Prova a ricaricare la pagina manualmente.', 'error');
+            // Notifica al genitore che il reset è completato
+            if (onResetComplete) {
+                onResetComplete();
             }
+        } else {
+            // Mostra il dialogo di conferma
+            setShowConfirmReset(true);
         }
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 bg-white p-2 shadow-lg border-t z-10 flex justify-center">
-            {/* Contenitore per il messaggio */}
-            {message && (
-                <div className={`fixed bottom-16 left-1/2 transform -translate-x-1/2 p-3 rounded-md shadow-md text-sm ${message.type === 'success' ? 'bg-green-100 text-green-800' :
-                        message.type === 'error' ? 'bg-red-100 text-red-800' :
-                            'bg-blue-100 text-blue-800'
-                    }`}>
-                    {message.text}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-md py-3 px-6 flex justify-between items-center">
+            <div className="flex space-x-2">
+                <button
+                    onClick={handleExport}
+                    disabled={isExporting}
+                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded shadow disabled:opacity-50"
+                >
+                    {isExporting ? 'Esportazione...' : 'Esporta Dati'}
+                </button>
+
+                <button
+                    onClick={handleReset}
+                    className={`${showConfirmReset
+                            ? 'bg-red-500 hover:bg-red-600'
+                            : 'bg-gray-500 hover:bg-gray-600'
+                        } text-white px-4 py-2 rounded shadow`}
+                >
+                    {showConfirmReset
+                        ? 'Conferma Reset'
+                        : 'Reset Dati'}
+                </button>
+            </div>
+
+            {showConfirmReset && (
+                <div className="text-sm text-red-500 ml-2">
+                    Attenzione: questa operazione canceller&agrave; tutti i dati inseriti.
                 </div>
             )}
 
-            <div className="flex gap-2">
-                <button
-                    onClick={esportaSimulazione}
-                    className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded text-sm"
-                    title="Esporta simulazione come file JSON"
-                >
-                    Esporta
-                </button>
-
-                <button
-                    onClick={resetSimulazione}
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm"
-                    title="Reimposta ai valori predefiniti"
-                >
-                    Reset
-                </button>
-            </div>
-
-            {/* Indicatore di autosalvataggio */}
-            <div className="absolute left-2 bottom-2 text-xs text-gray-500">
-                Autosalvataggio attivo
+            <div className="text-xs text-gray-500">
+                Versione {simulationData.versione}
             </div>
         </div>
     );
-
 };
-
-
 
 export default SessionControls;
