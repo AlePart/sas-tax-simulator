@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/sas-tax-simulator/static/css/main.410c8445.css",
-    "main.js": "/sas-tax-simulator/static/js/main.9b4539b9.js",
+    "main.css": "/sas-tax-simulator/static/css/main.0978479a.css",
+    "main.js": "/sas-tax-simulator/static/js/main.77ad60b6.js",
     "static/js/453.1379794c.chunk.js": "/sas-tax-simulator/static/js/453.1379794c.chunk.js",
     "index.html": "/sas-tax-simulator/index.html",
-    "main.410c8445.css.map": "/sas-tax-simulator/static/css/main.410c8445.css.map",
-    "main.9b4539b9.js.map": "/sas-tax-simulator/static/js/main.9b4539b9.js.map",
+    "main.0978479a.css.map": "/sas-tax-simulator/static/css/main.0978479a.css.map",
+    "main.77ad60b6.js.map": "/sas-tax-simulator/static/js/main.77ad60b6.js.map",
     "453.1379794c.chunk.js.map": "/sas-tax-simulator/static/js/453.1379794c.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.410c8445.css",
-    "static/js/main.9b4539b9.js"
+    "static/css/main.0978479a.css",
+    "static/js/main.77ad60b6.js"
   ]
 }
