@@ -114,7 +114,7 @@ const AziendaForm = ({
 
             <div className="mt-4 p-3 bg-blue-50 rounded">
                 <p className="text-sm text-gray-600">
-                    <strong>Nota:</strong> L&apos;utile aziendale &egrave;; calcolato sottraendo dal fatturato i costi base e solo i costi esenti dei soci operativi.
+                    <strong>Nota:</strong> L&apos;utile aziendale &egrave; calcolato sottraendo dal fatturato i costi base e solo i costi esenti dei soci operativi.
                     La parte non esente di buoni pasto e trasferte &egrave; invece considerata come parte del reddito imponibile dei singoli soci.
                 </p>
             </div>
