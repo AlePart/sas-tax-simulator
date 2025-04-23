@@ -126,8 +126,8 @@ const SocioResults = ({ risultato }) => {
 
             {socio.tipo === "operativo" && (
                 <div className="mt-3 text-xs text-gray-600 bg-gray-50 p-2 rounded">
-                    <p>Il netto percepito include: la quota di utile al netto delle imposte, più la parte esente di buoni pasto e trasferte.</p>
-                    <p>La parte non esente è inclusa nel reddito imponibile e quindi già considerata nel calcolo delle imposte.</p>
+                    <p>Il netto percepito include: la quota di utile al netto delle imposte, pi&ugrave; la parte esente di buoni pasto e trasferte.</p>
+                    <p>La parte non esente &egrave; inclusa nel reddito imponibile e quindi gi&agrave; considerata nel calcolo delle imposte.</p>
                 </div>
             )}
         </div>
