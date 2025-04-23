@@ -5,6 +5,7 @@ import SocioResults from './SocioResults';
 import ReportCharts from './ReportCharts';
 import Sidebar from '../UI/Sidebar';
 import SessionControls from '../UI/SessionControls';
+import LoadingIndicator from '../UI/LoadingIndicator';
 import {
     calcolaCostiSociOperativi,
     calcolaRisultatiSocio,
@@ -62,6 +63,10 @@ const SASTaxSimulator = () => {
     const [isInitialized, setIsInitialized] = useState(false);
     // Stato per tenere traccia delle modifiche
     const [hasChanges, setHasChanges] = useState(false);
+    // Stati per il caricamento
+    const [isLoading, setIsLoading] = useState(true);
+    const [loadingProgress, setLoadingProgress] = useState(0);
+    const [loadingMessage, setLoadingMessage] = useState('Inizializzazione del simulatore...');
 
     // Funzione per raccogliere tutti i dati correnti
     const collectCurrentData = useCallback(() => {
@@ -81,43 +86,75 @@ const SASTaxSimulator = () => {
     useEffect(() => {
         const loadSavedData = () => {
             try {
-                const savedData = loadAutoData();
+                setIsLoading(true);
+                setLoadingMessage('Caricamento dati salvati...');
+                setLoadingProgress(10);
 
-                if (savedData) {
-                    console.log('Caricamento dati salvati...');
+                // Simula progressi graduali del caricamento
+                const progressInterval = setInterval(() => {
+                    setLoadingProgress(prev => {
+                        if (prev >= 90) {
+                            clearInterval(progressInterval);
+                            return prev;
+                        }
+                        return prev + 5;
+                    });
+                }, 100);
 
-                    // Carica i dati salvati se disponibili
-                    if (savedData.fatturato !== undefined) setFatturato(Number(savedData.fatturato));
-                    if (savedData.costi !== undefined) setCosti(Number(savedData.costi));
-                    if (savedData.aliquotaIrap !== undefined) setAliquotaIrap(Number(savedData.aliquotaIrap));
-                    if (savedData.aliquotaInps !== undefined) setAliquotaInps(Number(savedData.aliquotaInps));
+                setTimeout(() => {
+                    const savedData = loadAutoData();
+                    setLoadingProgress(95);
 
-                    if (savedData.soci && Array.isArray(savedData.soci)) {
-                        // Assicuriamoci che tutti i soci abbiano un ID valido
-                        const validSoci = savedData.soci.map((socio, index) => ({
-                            ...socio,
-                            id: socio.id || index + 1
-                        }));
-                        setSoci(validSoci);
+                    if (savedData) {
+                        setLoadingMessage('Elaborazione dati...');
+
+                        // Carica i dati salvati se disponibili
+                        if (savedData.fatturato !== undefined) setFatturato(Number(savedData.fatturato));
+                        if (savedData.costi !== undefined) setCosti(Number(savedData.costi));
+                        if (savedData.aliquotaIrap !== undefined) setAliquotaIrap(Number(savedData.aliquotaIrap));
+                        if (savedData.aliquotaInps !== undefined) setAliquotaInps(Number(savedData.aliquotaInps));
+
+                        if (savedData.soci && Array.isArray(savedData.soci)) {
+                            // Assicuriamoci che tutti i soci abbiano un ID valido
+                            const validSoci = savedData.soci.map((socio, index) => ({
+                                ...socio,
+                                id: socio.id || index + 1
+                            }));
+                            setSoci(validSoci);
+                        }
+
+                        if (savedData.scaglioniIrpef && Array.isArray(savedData.scaglioniIrpef)) {
+                            setScaglioniIrpef(savedData.scaglioniIrpef);
+                        }
+
+                        if (savedData.aliqRegionale !== undefined) setAliqRegionale(Number(savedData.aliqRegionale));
+                        if (savedData.aliqComunale !== undefined) setAliqComunale(Number(savedData.aliqComunale));
+
+                        console.log('Dati caricati con successo.');
+                    } else {
+                        setLoadingMessage('Configurazione predefinita...');
+                        console.log('Nessun dato salvato trovato, utilizzo valori predefiniti.');
                     }
 
-                    if (savedData.scaglioniIrpef && Array.isArray(savedData.scaglioniIrpef)) {
-                        setScaglioniIrpef(savedData.scaglioniIrpef);
-                    }
+                    setLoadingProgress(100);
 
-                    if (savedData.aliqRegionale !== undefined) setAliqRegionale(Number(savedData.aliqRegionale));
-                    if (savedData.aliqComunale !== undefined) setAliqComunale(Number(savedData.aliqComunale));
-
-                    console.log('Dati caricati con successo.');
-                } else {
-                    console.log('Nessun dato salvato trovato, utilizzo valori predefiniti.');
-                }
+                    // Imposta lo stato di inizializzazione
+                    setTimeout(() => {
+                        setIsInitialized(true);
+                        setIsLoading(false);
+                        clearInterval(progressInterval);
+                    }, 500);
+                }, 800);
             } catch (error) {
                 console.error('Errore durante il caricamento dei dati:', error);
+                setLoadingMessage('Si è verificato un errore. Utilizzo valori predefiniti...');
                 // In caso di errore, manteniamo i valori predefiniti
-            } finally {
-                // Imposta lo stato di inizializzazione
-                setIsInitialized(true);
+
+                // Anche in caso di errore, terminiamo il caricamento dopo un certo tempo
+                setTimeout(() => {
+                    setIsInitialized(true);
+                    setIsLoading(false);
+                }, 1500);
             }
         };
 
@@ -212,6 +249,13 @@ const SASTaxSimulator = () => {
 
     return (
         <div className="p-6 max-w-6xl mx-auto bg-gray-50 relative pb-16">
+            {isLoading && (
+                <LoadingIndicator
+                    progress={loadingProgress}
+                    message={loadingMessage}
+                />
+            )}
+
             <h1 className="text-2xl font-bold mb-6 text-blue-800">Simulatore Tassazione SAS</h1>
 
             {/* Indicatore di salvataggio automatico */}

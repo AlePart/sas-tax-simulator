@@ -63,7 +63,7 @@ const SessionControls = ({ simulationData, onSave, onReset }) => {
                 // Elimina anche il cookie con il nome originale (per compatibilità)
                 document.cookie = `sas-simulator-data=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
 
-                showMessage('Simulazione reimpostata ai valori predefiniti. La pagina verrà ricaricata...', 'info');
+                showMessage('Simulazione reimpostata ai valori predefiniti.', 'info');
 
                 // Attendi un momento per mostrare il messaggio prima del reload
                 setTimeout(() => {
