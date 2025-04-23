@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import AziendaForm from './AziendaForm';
 import SocioList from './SocioList';
 import SocioResults from './SocioResults';
@@ -10,7 +10,7 @@ import {
     calcolaRisultatiSocio,
     creaNuovoSocio
 } from './utils';
-import { setCookie, getCookie } from '../../utils/cookieUtils';
+import { saveAutoData, loadAutoData, clearAutoData } from '../../utils/autoSaveUtils';
 
 /**
  * Componente principale del simulatore di tassazione SAS
@@ -58,25 +58,14 @@ const SASTaxSimulator = () => {
     const [aliqRegionale, setAliqRegionale] = useState(1.73);
     const [aliqComunale, setAliqComunale] = useState(0.8);
 
-    // Caricamento dati dai cookie all'avvio
-    useEffect(() => {
-        const savedData = getCookie('sas-simulator-data');
-        if (savedData) {
-            // Carica i dati salvati se disponibili
-            if (savedData.fatturato) setFatturato(savedData.fatturato);
-            if (savedData.costi) setCosti(savedData.costi);
-            if (savedData.aliquotaIrap) setAliquotaIrap(savedData.aliquotaIrap);
-            if (savedData.aliquotaInps) setAliquotaInps(savedData.aliquotaInps);
-            if (savedData.soci && Array.isArray(savedData.soci)) setSoci(savedData.soci);
-            if (savedData.scaglioniIrpef && Array.isArray(savedData.scaglioniIrpef)) setScaglioniIrpef(savedData.scaglioniIrpef);
-            if (savedData.aliqRegionale) setAliqRegionale(savedData.aliqRegionale);
-            if (savedData.aliqComunale) setAliqComunale(savedData.aliqComunale);
-        }
-    }, []);
+    // Stato di inizializzazione
+    const [isInitialized, setIsInitialized] = useState(false);
+    // Stato per tenere traccia delle modifiche
+    const [hasChanges, setHasChanges] = useState(false);
 
-    // Salvataggio automatico dei dati nei cookie quando cambiano
-    useEffect(() => {
-        const dataToSave = {
+    // Funzione per raccogliere tutti i dati correnti
+    const collectCurrentData = useCallback(() => {
+        return {
             fatturato,
             costi,
             aliquotaIrap,
@@ -86,8 +75,83 @@ const SASTaxSimulator = () => {
             aliqRegionale,
             aliqComunale
         };
-        setCookie('sas-simulator-data', dataToSave);
     }, [fatturato, costi, aliquotaIrap, aliquotaInps, soci, scaglioniIrpef, aliqRegionale, aliqComunale]);
+
+    // Caricamento dati all'avvio
+    useEffect(() => {
+        const loadSavedData = () => {
+            try {
+                const savedData = loadAutoData();
+
+                if (savedData) {
+                    console.log('Caricamento dati salvati...');
+
+                    // Carica i dati salvati se disponibili
+                    if (savedData.fatturato !== undefined) setFatturato(Number(savedData.fatturato));
+                    if (savedData.costi !== undefined) setCosti(Number(savedData.costi));
+                    if (savedData.aliquotaIrap !== undefined) setAliquotaIrap(Number(savedData.aliquotaIrap));
+                    if (savedData.aliquotaInps !== undefined) setAliquotaInps(Number(savedData.aliquotaInps));
+
+                    if (savedData.soci && Array.isArray(savedData.soci)) {
+                        // Assicuriamoci che tutti i soci abbiano un ID valido
+                        const validSoci = savedData.soci.map((socio, index) => ({
+                            ...socio,
+                            id: socio.id || index + 1
+                        }));
+                        setSoci(validSoci);
+                    }
+
+                    if (savedData.scaglioniIrpef && Array.isArray(savedData.scaglioniIrpef)) {
+                        setScaglioniIrpef(savedData.scaglioniIrpef);
+                    }
+
+                    if (savedData.aliqRegionale !== undefined) setAliqRegionale(Number(savedData.aliqRegionale));
+                    if (savedData.aliqComunale !== undefined) setAliqComunale(Number(savedData.aliqComunale));
+
+                    console.log('Dati caricati con successo.');
+                } else {
+                    console.log('Nessun dato salvato trovato, utilizzo valori predefiniti.');
+                }
+            } catch (error) {
+                console.error('Errore durante il caricamento dei dati:', error);
+                // In caso di errore, manteniamo i valori predefiniti
+            } finally {
+                // Imposta lo stato di inizializzazione
+                setIsInitialized(true);
+            }
+        };
+
+        loadSavedData();
+    }, []);
+
+    // Salvataggio automatico quando cambiano i dati (ma solo dopo l'inizializzazione)
+    useEffect(() => {
+        // Non salviamo durante l'inizializzazione per evitare di sovrascrivere i dati caricati
+        if (!isInitialized) return;
+
+        // Segnala che ci sono modifiche da salvare
+        setHasChanges(true);
+    }, [fatturato, costi, aliquotaIrap, aliquotaInps, soci, scaglioniIrpef, aliqRegionale, aliqComunale, isInitialized]);
+
+    // Effettua il salvataggio dopo un breve ritardo dall'ultima modifica
+    useEffect(() => {
+        if (!hasChanges || !isInitialized) return;
+
+        const saveTimeout = setTimeout(() => {
+            const currentData = collectCurrentData();
+            const saveResult = saveAutoData(currentData);
+
+            if (saveResult) {
+                console.log('Salvataggio automatico completato:', new Date().toLocaleTimeString());
+                setHasChanges(false);
+            } else {
+                console.warn('Salvataggio automatico non riuscito');
+            }
+        }, 1000); // Attende 1 secondo dall'ultima modifica prima di salvare
+
+        // Pulizia del timeout se i dati cambiano nuovamente prima del salvataggio
+        return () => clearTimeout(saveTimeout);
+    }, [hasChanges, isInitialized, collectCurrentData]);
 
     // Calcola i costi per soci operativi con dettaglio esente/non esente
     const costiInfo = calcolaCostiSociOperativi(soci);
@@ -150,6 +214,13 @@ const SASTaxSimulator = () => {
         <div className="p-6 max-w-6xl mx-auto bg-gray-50 relative pb-16">
             <h1 className="text-2xl font-bold mb-6 text-blue-800">Simulatore Tassazione SAS</h1>
 
+            {/* Indicatore di salvataggio automatico */}
+            {hasChanges && isInitialized && (
+                <div className="fixed top-4 right-4 bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-sm shadow-md z-50">
+                    Salvataggio in corso...
+                </div>
+            )}
+
             <AziendaForm
                 fatturato={fatturato}
                 setFatturato={setFatturato}
@@ -166,8 +237,6 @@ const SASTaxSimulator = () => {
                 costiEsenti={costiSociOperativi - costiNonEsenti}
                 costiNonEsenti={costiNonEsenti}
             />
-
-
 
             <SocioList
                 soci={soci}
@@ -216,7 +285,13 @@ const SASTaxSimulator = () => {
             />
 
             {/* Controlli per la sessione */}
-            <SessionControls simulationData={simulationData} />
+            <SessionControls
+                simulationData={simulationData}
+                onReset={() => {
+                    // Chiama la funzione di pulizia dati
+                    return clearAutoData();
+                }}
+            />
         </div>
     );
 };
