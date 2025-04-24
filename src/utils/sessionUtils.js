@@ -41,3 +41,25 @@ export const exportSessionData = (data) => {
     // Rilascia l'URL
     URL.revokeObjectURL(url);
 };
+
+export const importSessionData = (file) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        // Leggi il file come testo
+        reader.readAsText(file);
+        // Gestisci il caricamento del file
+        reader.onload = () => {
+            try {
+                // Analizza i dati JSON
+                const data = JSON.parse(reader.result);
+                resolve(data);
+            } catch (error) {
+                reject(new Error('Errore durante l\'analisi dei dati JSON: ' + error.message));
+            }
+        };
+        // Gestisci gli errori di lettura
+        reader.onerror = () => {
+            reject(new Error('Errore durante la lettura del file: ' + reader.error.message));
+        };
+    });
+}

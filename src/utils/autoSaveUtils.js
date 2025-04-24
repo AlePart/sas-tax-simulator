@@ -47,8 +47,10 @@ export const deleteAutoData = () => {
         // Prova a eliminare i dati dal cookie
         deleteCookie(STORAGE_KEY);
         console.log('Dati eliminati con successo dal cookie');
+        return true;
     } catch (error) {
         console.error('Errore durante l\'eliminazione dei dati dal cookie:', error);
+        return false;
     }
 };
 

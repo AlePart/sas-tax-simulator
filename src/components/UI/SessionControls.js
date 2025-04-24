@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { deleteAutoData } from '../../utils/autoSaveUtils';
+import { deleteAutoData, saveAutoData } from '../../utils/autoSaveUtils';
+import { loadAutoData } from '../../utils/autoSaveUtils';
+
 /**
  * Componente per i controlli di gestione della sessione
  * @param {Object} props
@@ -7,17 +9,45 @@ import { deleteAutoData } from '../../utils/autoSaveUtils';
  * @param {Function} props.onReset - Funzione chiamata quando si resetta la simulazione
  * @param {Function} props.onResetComplete - Callback eseguito al completamento del reset
  */
-const SessionControls = ({ simulationData, onReset, onResetComplete }) => {
+const SessionControls = ({ simulationData, onReset, onResetComplete, onDataRestored }) => {
     const [showConfirmReset, setShowConfirmReset] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
 
+    const handleImport = (event) => {
+        const file = event.target.files[0];
+        console.log('File selezionato:', file);
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    // Qui puoi gestire i dati importati come preferisci
+                    console.log('Dati importati:', data);
+                    deleteAutoData();
+                    saveAutoData(data);
+                    onDataRestored(data);
+                    
+
+                } catch (error) {
+                    console.error('Errore durante l\'importazione dei dati:', error);
+                    alert('Si è verificato un errore durante l\'importazione dei dati.');
+                }
+            };
+            // Leggi il file come testo
+            reader.readAsText(file);
+            
+        }
+        ;
+    };
     // Gestione dell'esportazione dati in formato JSON
     const handleExport = () => {
         setIsExporting(true);
 
         try {
             // Crea un blob JSON con i dati della simulazione
-            const dataStr = JSON.stringify(simulationData, null, 2);
+            console.log('Dati da esportare:', loadAutoData());
+            const dataStr = JSON.stringify(loadAutoData(), null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
 
@@ -67,7 +97,23 @@ const SessionControls = ({ simulationData, onReset, onResetComplete }) => {
                 >
                     {isExporting ? 'Esportazione...' : 'Esporta Dati'}
                 </button>
+                <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded shadow"
+                    onClick={() => {
+                        document.getElementById('fileInput').click();
 
+                    }
+                    }
+
+                >
+                Importa Dati
+                </button>
+                <input
+                    type="file"
+                    id="fileInput"
+                    accept=".json"
+                    onChange={handleImport}
+                    className="hidden"
+                />
                 <button
                     onClick={handleReset}
                     className={`${showConfirmReset

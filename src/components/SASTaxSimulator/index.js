@@ -157,6 +157,7 @@ const SASTaxSimulator = () => {
                     console.log('Reset completato con successo');
                 } else {
                     setLoadingMessage('Errore durante il reset. Ripristino valori predefiniti...');
+                    setLoadingProgress(75);
                     console.error('Errore durante il reset dei dati');
 
                     // Comunque ripristina i valori predefiniti
@@ -195,79 +196,7 @@ const SASTaxSimulator = () => {
 
     // Caricamento dati all'avvio
     useEffect(() => {
-        const loadSavedData = () => {
-            try {
-                setIsLoading(true);
-                setLoadingMessage('Caricamento dati salvati...');
-                setLoadingProgress(10);
-
-                // Simula progressi graduali del caricamento
-                const progressInterval = setInterval(() => {
-                    setLoadingProgress(prev => {
-                        if (prev >= 90) {
-                            clearInterval(progressInterval);
-                            return prev;
-                        }
-                        return prev + 5;
-                    });
-                }, 100);
-
-                setTimeout(() => {
-                    const savedData = loadAutoData();
-                    setLoadingProgress(95);
-
-                    if (savedData) {
-                        setLoadingMessage('Elaborazione dati...');
-
-                        // Carica i dati salvati se disponibili
-                        if (savedData.fatturato !== undefined) setFatturato(Number(savedData.fatturato));
-                        if (savedData.costi !== undefined) setCosti(Number(savedData.costi));
-                        if (savedData.aliquotaIrap !== undefined) setAliquotaIrap(Number(savedData.aliquotaIrap));
-                        if (savedData.aliquotaInps !== undefined) setAliquotaInps(Number(savedData.aliquotaInps));
-
-                        if (savedData.soci && Array.isArray(savedData.soci)) {
-                            // Assicuriamoci che tutti i soci abbiano un ID valido
-                            const validSoci = savedData.soci.map((socio, index) => ({
-                                ...socio,
-                                id: socio.id || index + 1
-                            }));
-                            setSoci(validSoci);
-                        }
-
-                        if (savedData.scaglioniIrpef && Array.isArray(savedData.scaglioniIrpef)) {
-                            setScaglioniIrpef(savedData.scaglioniIrpef);
-                        }
-
-                        if (savedData.aliqRegionale !== undefined) setAliqRegionale(Number(savedData.aliqRegionale));
-                        if (savedData.aliqComunale !== undefined) setAliqComunale(Number(savedData.aliqComunale));
-
-                        console.log('Dati caricati con successo.');
-                    } else {
-                        setLoadingMessage('Configurazione predefinita...');
-                        console.log('Nessun dato salvato trovato, utilizzo valori predefiniti.');
-                    }
-
-                    setLoadingProgress(100);
-
-                    // Imposta lo stato di inizializzazione
-                    setTimeout(() => {
-                        setIsInitialized(true);
-                        setIsLoading(false);
-                        clearInterval(progressInterval);
-                    }, 500);
-                }, 800);
-            } catch (error) {
-                console.error('Errore durante il caricamento dei dati:', error);
-                setLoadingMessage('Si è verificato un errore. Utilizzo valori predefiniti...');
-                // In caso di errore, manteniamo i valori predefiniti
-
-                // Anche in caso di errore, terminiamo il caricamento dopo un certo tempo
-                setTimeout(() => {
-                    setIsInitialized(true);
-                    setIsLoading(false);
-                }, 1500);
-            }
-        };
+        const loadSavedData = loadFromCookie(setIsLoading, setLoadingMessage, setLoadingProgress, setFatturato, setCosti, setAliquotaIrap, setAliquotaInps, setSoci, setScaglioniIrpef, setAliqRegionale, setAliqComunale, setIsInitialized);
 
         loadSavedData();
     }, []);
@@ -443,13 +372,106 @@ const SASTaxSimulator = () => {
             <SessionControls
                 simulationData={simulationData}
                 onReset={handleReset}
+                onDataRestored={(data) => {
+                    //reload stored data
+                    loadFromCookie(setIsLoading, setLoadingMessage, setLoadingProgress, setFatturato, setCosti, setAliquotaIrap, setAliquotaInps, setSoci, setScaglioniIrpef, setAliqRegionale, setAliqComunale, setIsInitialized)();
+                   // loadFromCookie(true, "Importazione dati...", true, data.fatturato, data.costi, data.aliquotaIrap, data.aliquotaInps,data.soci,data.scaglioniIrpef,data.aliqRegionale,data.aliqComunale,true)();
+                }
+                }
                 onResetComplete={() => {
                     // Eventuali operazioni aggiuntive da eseguire al completamento del reset
                     console.log('Reset completato e UI aggiornata');
                 }}
+                
             />
         </div>
     );
 };
 
 export default SASTaxSimulator;
+
+function loadFromCookie(setIsLoading,
+                            setLoadingMessage,
+                            setLoadingProgress,
+                            setFatturato,
+                            setCosti,
+                            setAliquotaIrap,
+                            setAliquotaInps,
+                            setSoci,
+                            setScaglioniIrpef,
+                            setAliqRegionale,
+                            setAliqComunale,
+                            setIsInitialized) {
+    return () => {
+        try {
+            setIsLoading(true);
+            setLoadingMessage('Caricamento dati salvati...');
+            setLoadingProgress(10);
+
+            // Simula progressi graduali del caricamento
+            const progressInterval = setInterval(() => {
+                setLoadingProgress(prev => {
+                    if (prev >= 90) {
+                        clearInterval(progressInterval);
+                        return prev;
+                    }
+                    return prev + 5;
+                });
+            }, 100);
+
+            setTimeout(() => {
+                const savedData = loadAutoData();
+                setLoadingProgress(95);
+
+                if (savedData) {
+                    setLoadingMessage('Elaborazione dati...');
+
+                    // Carica i dati salvati se disponibili
+                    if (savedData.fatturato !== undefined) setFatturato(Number(savedData.fatturato));
+                    if (savedData.costi !== undefined) setCosti(Number(savedData.costi));
+                    if (savedData.aliquotaIrap !== undefined) setAliquotaIrap(Number(savedData.aliquotaIrap));
+                    if (savedData.aliquotaInps !== undefined) setAliquotaInps(Number(savedData.aliquotaInps));
+
+                    if (savedData.soci && Array.isArray(savedData.soci)) {
+                        // Assicuriamoci che tutti i soci abbiano un ID valido
+                        const validSoci = savedData.soci.map((socio, index) => ({
+                            ...socio,
+                            id: socio.id || index + 1
+                        }));
+                        setSoci(validSoci);
+                    }
+
+                    if (savedData.scaglioniIrpef && Array.isArray(savedData.scaglioniIrpef)) {
+                        setScaglioniIrpef(savedData.scaglioniIrpef);
+                    }
+
+                    if (savedData.aliqRegionale !== undefined) setAliqRegionale(Number(savedData.aliqRegionale));
+                    if (savedData.aliqComunale !== undefined) setAliqComunale(Number(savedData.aliqComunale));
+
+                    console.log('Dati caricati con successo.');
+                } else {
+                    setLoadingMessage('Configurazione predefinita...');
+                    console.log('Nessun dato salvato trovato, utilizzo valori predefiniti.');
+                }
+
+                setLoadingProgress(100);
+
+                // Imposta lo stato di inizializzazione
+                setTimeout(() => {
+                    setIsInitialized(true);
+                    setIsLoading(false);
+                    clearInterval(progressInterval);
+                }, 500);
+            }, 800);
+        } catch (error) {
+            console.error('Errore durante il caricamento dei dati:', error);
+            setLoadingMessage('Si è verificato un errore. Utilizzo valori predefiniti...');
+            // In caso di errore, manteniamo i valori predefiniti
+            // Anche in caso di errore, terminiamo il caricamento dopo un certo tempo
+            setTimeout(() => {
+                setIsInitialized(true);
+                setIsLoading(false);
+            }, 1500);
+        }
+    };
+}
