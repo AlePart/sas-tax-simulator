@@ -24,7 +24,7 @@ Un'applicazione web per simulare la tassazione di una Società in Accomandita Sem
 
 - Le SAS sono soggette a IRAP (non a IRES)
 - I rimborsi trasferta sono esenti fino a una soglia definita (default 46,48€/giorno)
-- L'aliquota INPS è configurabile (default 23,1%)
+- L'aliquota INPS è configurabile (default 25%)
 
 ## Sviluppo
 

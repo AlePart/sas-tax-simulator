@@ -1,4 +1,6 @@
 import React from 'react';
+import Tooltip from '@mui/material/Tooltip';
+import InfoIcon from '@mui/icons-material/Info';
 
 /**
  * Form per i dettagli del socio
@@ -96,12 +98,19 @@ const SocioForm = ({ socio, updateSocio, rimuoviSocio }) => {
                                 onChange={(e) => updateSocio(socio.id, 'buoniPasto', e.target.checked)}
                                 className="mr-2"
                             />
-                            Buoni Pasto 
+                            Buoni Pasto
                         </label>
                         {socio.buoniPasto && (
                             <div className="grid grid-cols-2 gap-2">
                                 <div>
-                                    <label className="block text-xs text-gray-600">Valore (&euro;/giorno)</label>
+                                    <label className=" text-xs text-gray-600">Valore (&euro;/giorno)</label>
+
+                                    <Tooltip title="Deducibilit&agrave; al 75%" animate={{
+                                        mount: { scale: 2, y: 0 },
+                                        unmount: { scale: 0, y: 25 },
+                                      }}  placement="right-end">
+                                        <InfoIcon className="ml-1 text-orange-400" fontSize="small"/>
+                                    </Tooltip>     
                                     <input
                                         type="number"
                                         min="0"
@@ -110,18 +119,10 @@ const SocioForm = ({ socio, updateSocio, rimuoviSocio }) => {
                                         onChange={(e) => updateSocio(socio.id, 'valoreBuoniPasto', Number(e.target.value))}
                                         className="w-full p-2 border border-gray-300 rounded"
                                     />
+                                    
+                                    
                                 </div>
-                                <div>
-                                    <label className="block text-xs text-gray-600">Esente fino a (&euro;)</label>
-                                    <input
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
-                                        value={socio.buoniPastoEsentiFino}
-                                        onChange={(e) => updateSocio(socio.id, 'buoniPastoEsentiFino', Number(e.target.value))}
-                                        className="w-full p-2 border border-gray-300 rounded"
-                                    />
-                                </div>
+
                             </div>
                         )}
                     </div>

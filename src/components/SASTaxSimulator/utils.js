@@ -30,7 +30,6 @@ export const creaNuovoSocio = (id, nome = "Nuovo Socio") => {
         giornateLavorate: 220,
         buoniPasto: false,
         valoreBuoniPasto: 8,
-        buoniPastoEsentiFino: 8, // Soglia di esenzione buoni pasto, default 8€
         trasferte: false,
         giorniTrasferta: 0,
         importoTrasfertaGiorno: 50,
@@ -55,21 +54,7 @@ export const calcolaCostiSociOperativi = (soci) => {
         if (socio.tipo === "operativo") {
             // Calcolo buoni pasto
             if (socio.buoniPasto) {
-                const totaleBuoniPasto = socio.valoreBuoniPasto * socio.giornateLavorate;
-                // Gestione della soglia di esenzione per i buoni pasto
-                const valoreBuonoGiornaliero = socio.valoreBuoniPasto;
-                const sogliaBuono = socio.buoniPastoEsentiFino || 8; // Default 8€ se non specificato
-
-                if (valoreBuonoGiornaliero <= sogliaBuono) {
-                    // Se il valore è sotto la soglia, tutto è esente
-                    costiBuoniPastoEsenti += totaleBuoniPasto;
-                } else {
-                    // Se supera la soglia, dividiamo tra esente e non esente
-                    costiBuoniPastoEsenti += sogliaBuono * socio.giornateLavorate;
-                    costiBuoniPastoNonEsenti += (valoreBuonoGiornaliero - sogliaBuono) * socio.giornateLavorate;
-                }
-
-                totaleCosti += totaleBuoniPasto;
+                ({ costiBuoniPastoEsenti, costiBuoniPastoNonEsenti, totaleCosti } = CalcolaBuoniPasto(socio, costiBuoniPastoEsenti, costiBuoniPastoNonEsenti, totaleCosti));
             }
 
             // Calcolo trasferte
@@ -197,18 +182,25 @@ export const calcolaRisultatiSocio = (
     if (socio.tipo === "operativo") {
         // Buoni pasto
         if (socio.buoniPasto) {
-            const totaleBuoni = socio.valoreBuoniPasto * socio.giornateLavorate;
-            importoBuoniPasto = totaleBuoni;
+            //const totaleBuoni = socio.valoreBuoniPasto * socio.giornateLavorate;
+            //importoBuoniPasto = totaleBuoni;
 
-            // Calcola la parte esente e non esente
-            const sogliaBuoni = socio.buoniPastoEsentiFino || 8; // Default 8€
-            if (socio.valoreBuoniPasto <= sogliaBuoni) {
-                importoBuoniPastoEsenti = totaleBuoni;
-                importoBuoniPastoNonEsenti = 0;
-            } else {
-                importoBuoniPastoEsenti = sogliaBuoni * socio.giornateLavorate;
-                importoBuoniPastoNonEsenti = (socio.valoreBuoniPasto - sogliaBuoni) * socio.giornateLavorate;
-            }
+            //// Calcola la parte esente e non esente
+            //const sogliaBuoni = socio.buoniPastoEsentiFino || 8; // Default 8€
+            //if (socio.valoreBuoniPasto <= sogliaBuoni) {
+            //    importoBuoniPastoEsenti = totaleBuoni;
+            //    importoBuoniPastoNonEsenti = 0;
+            //} else {
+            //    importoBuoniPastoEsenti = sogliaBuoni * socio.giornateLavorate;
+            //    importoBuoniPastoNonEsenti = (socio.valoreBuoniPasto - sogliaBuoni) * socio.giornateLavorate;
+            //}
+            let costiBuoniPastoEsenti = 0;
+            let costiBuoniPastoNonEsenti = 0;
+            let totaleCosti = 0;
+            ({ costiBuoniPastoEsenti, costiBuoniPastoNonEsenti, totaleCosti } = CalcolaBuoniPasto(socio, costiBuoniPastoEsenti, costiBuoniPastoNonEsenti, totaleCosti));
+            importoTrasferteEsenti = costiBuoniPastoEsenti;
+            importoTrasferteNonEsenti = costiBuoniPastoNonEsenti;
+            importoBuoniPasto = totaleCosti;
         }
 
         // Trasferte
@@ -284,3 +276,11 @@ export const calcolaRisultatiSocio = (
 export const calcolaTotaleSoci = (risultatiSoci, proprieta) => {
     return risultatiSoci.reduce((acc, risultato) => acc + risultato[proprieta], 0);
 };
+
+function CalcolaBuoniPasto(socio, costiBuoniPastoEsenti, costiBuoniPastoNonEsenti, totaleCosti) {
+    const totaleBuoniPasto = socio.valoreBuoniPasto * socio.giornateLavorate;
+    costiBuoniPastoEsenti += socio.valoreBuoniPasto * socio.giornateLavorate * 0.75;
+    costiBuoniPastoNonEsenti += costiBuoniPastoEsenti * (0.25);
+    totaleCosti += totaleBuoniPasto;
+    return { costiBuoniPastoEsenti, costiBuoniPastoNonEsenti, totaleCosti };
+}

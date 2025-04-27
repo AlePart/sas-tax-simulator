@@ -21,7 +21,7 @@ const SASTaxSimulator = () => {
     const [fatturato, setFatturato] = useState(100000);
     const [costi, setCosti] = useState(40000);
     const [aliquotaIrap, setAliquotaIrap] = useState(3.9); // Default IRAP 3.9%
-    const [aliquotaInps, setAliquotaInps] = useState(23.1);
+    const [aliquotaInps, setAliquotaInps] = useState(25.0);
 
     // Stato per i soci con valori predefiniti
     const [soci, setSoci] = useState([
@@ -75,7 +75,7 @@ const SASTaxSimulator = () => {
         setFatturato(100000);
         setCosti(40000);
         setAliquotaIrap(3.9);
-        setAliquotaInps(23.1);
+        setAliquotaInps(25.0);
         setSoci([
             {
                 ...creaNuovoSocio(1, "Mario Rossi"),
