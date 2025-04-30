@@ -198,8 +198,8 @@ export const calcolaRisultatiSocio = (
             let costiBuoniPastoNonEsenti = 0;
             let totaleCosti = 0;
             ({ costiBuoniPastoEsenti, costiBuoniPastoNonEsenti, totaleCosti } = CalcolaBuoniPasto(socio, costiBuoniPastoEsenti, costiBuoniPastoNonEsenti, totaleCosti));
-            importoTrasferteEsenti = costiBuoniPastoEsenti;
-            importoTrasferteNonEsenti = costiBuoniPastoNonEsenti;
+            importoBuoniPastoEsenti = costiBuoniPastoEsenti;
+            importoBuoniPastoNonEsenti = costiBuoniPastoNonEsenti;
             importoBuoniPasto = totaleCosti;
         }
 
