@@ -284,7 +284,7 @@ const SASTaxSimulator = () => {
         soci,
         risultati: risultatiSoci,
         dataSimulazione: new Date().toISOString(),
-        versione: "1.0.0"
+        versione: "1.1.0"
     };
 
     return (
