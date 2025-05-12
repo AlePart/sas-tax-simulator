@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "/sas-tax-simulator/static/css/main.282eb01a.css",
-    "main.js": "/sas-tax-simulator/static/js/main.311fd09f.js",
+    "main.css": "/sas-tax-simulator/static/css/main.1a3eb416.css",
+    "main.js": "/sas-tax-simulator/static/js/main.83c19e65.js",
     "static/js/807.c25f4114.chunk.js": "/sas-tax-simulator/static/js/807.c25f4114.chunk.js",
     "static/js/453.1379794c.chunk.js": "/sas-tax-simulator/static/js/453.1379794c.chunk.js",
-    "static/js/822.b0883faf.chunk.js": "/sas-tax-simulator/static/js/822.b0883faf.chunk.js",
+    "static/js/822.19220d32.chunk.js": "/sas-tax-simulator/static/js/822.19220d32.chunk.js",
     "index.html": "/sas-tax-simulator/index.html",
-    "main.282eb01a.css.map": "/sas-tax-simulator/static/css/main.282eb01a.css.map",
-    "main.311fd09f.js.map": "/sas-tax-simulator/static/js/main.311fd09f.js.map",
+    "main.1a3eb416.css.map": "/sas-tax-simulator/static/css/main.1a3eb416.css.map",
+    "main.83c19e65.js.map": "/sas-tax-simulator/static/js/main.83c19e65.js.map",
     "807.c25f4114.chunk.js.map": "/sas-tax-simulator/static/js/807.c25f4114.chunk.js.map",
     "453.1379794c.chunk.js.map": "/sas-tax-simulator/static/js/453.1379794c.chunk.js.map",
-    "822.b0883faf.chunk.js.map": "/sas-tax-simulator/static/js/822.b0883faf.chunk.js.map"
+    "822.19220d32.chunk.js.map": "/sas-tax-simulator/static/js/822.19220d32.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.282eb01a.css",
-    "static/js/main.311fd09f.js"
+    "static/css/main.1a3eb416.css",
+    "static/js/main.83c19e65.js"
   ]
 }
